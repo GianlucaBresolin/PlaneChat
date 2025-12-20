@@ -4,7 +4,7 @@
     "slug": "PlaneChat",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/PlaneChatIcon.png",
     "scheme": "planechat",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
