@@ -2,7 +2,9 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "paths": {
+    "paths": { 
+      "multipeer-connectivity-module": ["./multipeer-connectivity-module/src/index"],
+      "multipeer-connectivity-module/*": ["./multipeer-connectivity-module/src/*"],
       "@/*": [
         "./*"
       ]
