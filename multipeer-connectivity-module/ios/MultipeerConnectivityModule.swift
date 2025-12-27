@@ -6,12 +6,13 @@ public class MultipeerConnectivityModule: Module {
 
     Events("onNewRoom")
 
+    Function("initialize") {() -> Void in
+        // init Manager
+        _ = MultipeerManager.shared
+    }
+      
     Function("getPeerID") { () -> String in
-      let roomName = UIDevice.current.name
-      self.sendEvent("onNewRoom", [
-        "roomName" : roomName
-      ])
-      return "PeerID"
+        return MultipeerManager.shared.getPeerIDAsString()
     }
   }
 }

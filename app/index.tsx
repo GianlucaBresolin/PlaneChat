@@ -8,12 +8,11 @@ export default function Index() {
 
   useEffect(() => {
     const subscription = MultipeerConnectivityModule.addNewRoomListener(({ roomName }) => {
-      console.log("New room available:", roomName);
       setAvailableRooms(( prevRooms ) => [...prevRooms, roomName]);
     });
 
     return () => subscription.remove();
-  }, [setAvailableRooms]);
+  }, []);
 
   return (
     <View
