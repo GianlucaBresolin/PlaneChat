@@ -7,8 +7,10 @@ class MultipeerManager: NSObject {
     
     // Private Data
     private var PeerID: MCPeerID
+    private var Session: MCSession?
         
     override init() {
+        // PeerID
         if let data = UserDefaults.standard.data(forKey: "multiconnectivity-peer-id"),
            let savedPeerID = try? NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: data) {
             // restore existing PeerID
@@ -28,5 +30,11 @@ class MultipeerManager: NSObject {
     
     func getPeerIDAsString() -> String {
         return self.PeerID.displayName
+    }
+    
+    func createSession(sessionName: String) -> Void {
+        if self.Session == nil {
+            self.Session = MCSession(peer: self.PeerID)
+        }
     }
 }

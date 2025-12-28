@@ -14,5 +14,9 @@ public class MultipeerConnectivityModule: Module {
     Function("getPeerID") { () -> String in
         return MultipeerManager.shared.getPeerIDAsString()
     }
+      
+    Function("createSession") { (sessionName: String) -> Void in
+        return MultipeerManager.shared.createSession(sessionName: sessionName)
+    }
   }
 }
