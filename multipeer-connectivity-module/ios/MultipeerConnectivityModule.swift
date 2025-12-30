@@ -1,10 +1,10 @@
 import ExpoModulesCore
 
-public class MultipeerConnectivityModule: Module, MultipeerManagerDelegate {
+public class MultipeerConnectivityModule: Module {
     public func definition() -> ModuleDefinition {
         Name("MultipeerConnectivityModule")
 
-        Events("receivedMessage")
+        Events("foundSession", "receivedMessage")
 
         Function("initialize") {() -> Void in
             // init Manager and assign delegate
@@ -19,6 +19,13 @@ public class MultipeerConnectivityModule: Module, MultipeerManagerDelegate {
             MultipeerManager.shared.leaveRoom()
         }
         
+        Function("joinSession") { (sessionName: String) -> Void in
+            MultipeerManager.shared.handleInvitationResponse(
+                sessionName: sessionName,
+                accept: true
+            )
+        }
+        
         Function("sendMessage") { (message: String, sender: String) -> Void in
             MultipeerManager.shared.sendMessage(
                 sender: sender,
@@ -26,7 +33,15 @@ public class MultipeerConnectivityModule: Module, MultipeerManagerDelegate {
             )
         }
     }
+}
 
+extension MultipeerConnectivityModule: MultipeerManagerDelegate {
+    func notifySession(sessionName: String) {
+        sendEvent("foundSession", [
+            "sessionName" : sessionName
+        ])
+    }
+    
     func notifyMessage(sender: String, message: String) {
         sendEvent("receivedMessage", [
             "sender" : sender,

@@ -2,6 +2,7 @@ import MultipeerConnectivity
 import UIKit
 
 protocol MultipeerManagerDelegate: AnyObject {
+    func notifySession(sessionName: String)
     func notifyMessage(sender: String, message: String)
 }
 
@@ -16,6 +17,8 @@ class MultipeerManager: NSObject {
     private var PeerID: MCPeerID
     private var Session: MCSession?
     private var Browser: MCNearbyServiceBrowser?
+    private var Advertiser: MCNearbyServiceAdvertiser?
+    private var PendingInvitations: [String: (Bool, MCSession?) -> Void] = [:]
     private var Neighbors: [MCPeerID] = []
         
     override init() {
@@ -38,11 +41,15 @@ class MultipeerManager: NSObject {
         // MCNearbyServiceBrowser
         createBrowser()
         startBrowsing()
+        // MCNearbyServiceAdvertiser
+        createAdvertiser()
+        startAdvertising()
     }
     
     deinit {
         // to do
         stopBrowsing()
+        stopAdvertising()
     }
         
     // Multipeer Connectivity Logic
@@ -94,17 +101,34 @@ class MultipeerManager: NSObject {
         browser.stopBrowsingForPeers()
     }
     
-    func getAvailableSessions() -> [MCSession] {
-        // to do
-        return []
+    private func createAdvertiser() -> Void {
+        guard self.Advertiser == nil else {
+            print("An advertiser already exists")
+            return
+        }
+        let advertiser = MCNearbyServiceAdvertiser(
+            peer: self.PeerID,
+            discoveryInfo: nil,
+            serviceType: "plane-chat"
+        )
+        advertiser.delegate = self
+        self.Advertiser = advertiser
     }
     
-    func advertiseSession() -> Void {
-        // to do
+    private func startAdvertising() -> Void {
+        guard let advertiser = self.Advertiser else {
+            print("Error: no available advertiser")
+            return
+        }
+        advertiser.startAdvertisingPeer()
     }
     
-    func stopAdvertisingSession() -> Void {
-        // to do
+    private func stopAdvertising() -> Void {
+        guard let advertiser = self.Advertiser else {
+            print("Error: no available advertiser")
+            return
+        }
+        advertiser.stopAdvertisingPeer()
     }
     
     private func sendData(data: Data) -> Void {
@@ -129,6 +153,15 @@ class MultipeerManager: NSObject {
     // module methods
     func launchRoom() -> Void {
         createSession(sessionName: "default-session")
+    }
+    
+    func handleInvitationResponse(sessionName: String, accept: Bool) {
+        guard let invitationHandler = self.PendingInvitations[sessionName] else {
+            print("Error: no invitation found for session: \(sessionName)")
+            return
+        }
+        invitationHandler(accept, self.Session)
+        self.PendingInvitations.removeValue(forKey: sessionName)
     }
     
     func leaveRoom() -> Void {
@@ -181,9 +214,7 @@ extension MultipeerManager: MCSessionDelegate {
 
     // not relevant for our application
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) { }
-    
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) { }
-    
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: (any Error)?) { }
 }
 
@@ -202,10 +233,10 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
             return
         }
         browser.invitePeer(
-            self.PeerID,
+            peerID,
             to: session,
             withContext: session.description.data(using: .utf8),
-            timeout: 60
+            timeout: 120
         )
     }
 
@@ -215,5 +246,28 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
         if let index = self.Neighbors.firstIndex(of: peerID) {
             self.Neighbors.remove(at: index)
         }
+    }
+}
+
+extension MultipeerManager: MCNearbyServiceAdvertiserDelegate {
+    // invitation handler
+    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
+        // extract session name
+        guard let data = context else {
+            print("Error: invalid invitation")
+            return
+        }
+        guard let sessionName = String(data: data, encoding: .utf8) else {
+            print("Error during session name extraction")
+            return
+        }
+        // notify invitation to session
+        DispatchQueue.main.async {
+            self.delegate?.notifySession(
+                sessionName: sessionName
+            )
+        }
+        // store invitationHandler
+        self.PendingInvitations[sessionName] = invitationHandler
     }
 }
