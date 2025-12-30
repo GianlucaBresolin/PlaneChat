@@ -1,15 +1,28 @@
 import { EventSubscription } from 'expo-modules-core';
 import MultipeerConnectivityModule from './MultipeerConnectivityModule';
-import { NewRoomEvent } from './MultipeerConnectivityModule.types';
+import { ReceivedMessage } from './MultipeerConnectivityModule.types';
 
-export function addNewRoomListener(
-    listener: (event: NewRoomEvent) => void 
+export function addReceivedMessageListener(
+    listener: (event: ReceivedMessage) => void 
 ): EventSubscription {
-    return MultipeerConnectivityModule.addListener("onNewRoom", listener);
+    return MultipeerConnectivityModule.addListener("onReceivedMessage", listener);
 }
 
-export function getPeerID(): string {
-    return MultipeerConnectivityModule.getPeerID();
+export function createRoom(): void {
+    return MultipeerConnectivityModule.createRoom();
 }
 
-export { MultipeerConnectivityModule, NewRoomEvent };
+export function leaveRoom(): void {
+    return MultipeerConnectivityModule.leaveRoom();
+}
+
+export function sendMessage(
+    sender: string,
+    message: string
+): void {
+    return MultipeerConnectivityModule.sendMessage(sender, message);
+}
+
+export { MultipeerConnectivityModule };
+export type { ReceivedMessage };
+

@@ -1,3 +1,4 @@
-export type NewRoomEvent = {
-    roomName: string;
+export type ReceivedMessage = {
+    sender: string;
+    message: string;
 }

@@ -1,14 +1,13 @@
-import * as MultipeerConnectivityModule from "multipeer-connectivity-module";
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { MultipeerConnectivityModule, ReceivedMessage } from "multipeer-connectivity-module";
+import { useEffect } from "react";
+import { View } from "react-native";
 import { LaunchRoom } from "../components/LaunchRoom";
 
 export default function Index() {
-  const [availableRooms, setAvailableRooms]  = useState<string[]>([]);
-
   useEffect(() => {
-    const subscription = MultipeerConnectivityModule.addNewRoomListener(({ roomName }) => {
-      setAvailableRooms(( prevRooms ) => [...prevRooms, roomName]);
+    const subscription = MultipeerConnectivityModule.addReceivedMessageListener((event: ReceivedMessage) => {
+      // Handle received message
+      console.log(`Message from ${event.sender}: ${event.message}`);
     });
 
     return () => subscription.remove();
@@ -23,7 +22,6 @@ export default function Index() {
       }}
     >
       <LaunchRoom />
-      <Text>{MultipeerConnectivityModule.getPeerID()}</Text>
     </View>
   );
 }
