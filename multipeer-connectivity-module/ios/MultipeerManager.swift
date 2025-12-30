@@ -15,6 +15,8 @@ class MultipeerManager: NSObject {
     // Private Data
     private var PeerID: MCPeerID
     private var Session: MCSession?
+    private var Browser: MCNearbyServiceBrowser?
+    private var Neighbors: [MCPeerID] = []
         
     override init() {
         // PeerID
@@ -33,6 +35,14 @@ class MultipeerManager: NSObject {
             }
         }
         super.init()
+        // MCNearbyServiceBrowser
+        createBrowser()
+        startBrowsing()
+    }
+    
+    deinit {
+        // to do
+        stopBrowsing()
     }
         
     // Multipeer Connectivity Logic
@@ -55,20 +65,49 @@ class MultipeerManager: NSObject {
         self.Session = nil
     }
     
+    private func createBrowser() -> Void {
+        guard self.Browser == nil else {
+            print("A browser already exists.")
+            return
+        }
+        let browser = MCNearbyServiceBrowser(
+            peer: self.PeerID,
+            serviceType: "plane-chat"
+        )
+        browser.delegate = self
+        self.Browser = browser
+    }
+    
+    private func startBrowsing() -> Void {
+        guard let browser = self.Browser else {
+            print("Error: no available browser")
+            return
+        }
+        browser.startBrowsingForPeers()
+    }
+    
+    private func stopBrowsing() -> Void {
+        guard let browser = self.Browser else {
+            print("Error: no available browser")
+            return
+        }
+        browser.stopBrowsingForPeers()
+    }
+    
     func getAvailableSessions() -> [MCSession] {
-        // implement
+        // to do
         return []
     }
     
     func advertiseSession() -> Void {
-        // implement
+        // to do
     }
     
     func stopAdvertisingSession() -> Void {
-        // implement
+        // to do
     }
     
-    func sendData(data: Data) -> Void {
+    private func sendData(data: Data) -> Void {
         guard let peers = self.Session?.connectedPeers else {
             print("No session found.")
             return
@@ -110,9 +149,9 @@ class MultipeerManager: NSObject {
 
 extension MultipeerManager: MCSessionDelegate {
     
-    // 1. Chiamato quando un peer cambia stato (si connette/disconnette)
+    // call when a peer change state (connect/disconnect)
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        // Qui puoi gestire i cambiamenti di stato
+        // to do
     }
 
     // call when a message is received
@@ -140,10 +179,41 @@ extension MultipeerManager: MCSessionDelegate {
         
     }
 
-    // 3. Metodi obbligatori (anche se vuoti, vanno dichiarati)
+    // not relevant for our application
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) { }
     
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) { }
     
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: (any Error)?) { }
+}
+
+extension MultipeerManager: MCNearbyServiceBrowserDelegate {
+    // call when found a peer
+    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+        // save to our peers
+        self.Neighbors.append(peerID)
+        
+        guard let session = self.Session else {
+            return
+        }
+        // send request to join our session
+        guard let browser = self.Browser else {
+            print("Error: no browser available")
+            return
+        }
+        browser.invitePeer(
+            self.PeerID,
+            to: session,
+            withContext: session.description.data(using: .utf8),
+            timeout: 60
+        )
+    }
+
+    // call when a peer is lost
+    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+        // remove it from saved peers (if present)
+        if let index = self.Neighbors.firstIndex(of: peerID) {
+            self.Neighbors.remove(at: index)
+        }
+    }
 }
