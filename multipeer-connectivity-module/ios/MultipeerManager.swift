@@ -16,10 +16,14 @@ class MultipeerManager: NSObject {
     // Private Data
     private var PeerID: MCPeerID
     private var Session: MCSession?
+    private var SessionName : String = ""
     private var Browser: MCNearbyServiceBrowser?
     private var Advertiser: MCNearbyServiceAdvertiser?
     private var PendingInvitations: [String: (Bool, MCSession?) -> Void] = [:]
     private var Neighbors: [MCPeerID] = []
+    
+    // Constants
+    private let InviteDuration: TimeInterval = 120
         
     override init() {
         // PeerID
@@ -58,9 +62,13 @@ class MultipeerManager: NSObject {
             print("A session already exists.")
             return
         }
-        let newSession = MCSession(peer: self.PeerID)
+        let newSession = MCSession(
+            peer: self.PeerID,
+            
+        )
         newSession.delegate = self
         self.Session = newSession
+        self.SessionName = sessionName
     }
     
     private func disconnectSession() -> Void {
@@ -70,6 +78,7 @@ class MultipeerManager: NSObject {
         }
         session.disconnect()
         self.Session = nil
+        self.SessionName = ""
     }
     
     private func createBrowser() -> Void {
@@ -131,6 +140,30 @@ class MultipeerManager: NSObject {
         advertiser.stopAdvertisingPeer()
     }
     
+    private func inviteNeighborsToSession() -> Void {
+        let neighbors = self.Neighbors
+        guard neighbors.isEmpty == false else {
+            // no neighbors founded
+            return
+        }
+        guard let browser = self.Browser else {
+            print("Error: no available browser")
+            return
+        }
+        guard let session = self.Session else {
+            print("Error: no available session")
+            return
+        }
+        for peerID in neighbors {
+            browser.invitePeer(
+                peerID,
+                to: session,
+                withContext: self.SessionName.data(using: .utf8),
+                timeout: self.InviteDuration
+            )
+        }
+    }
+    
     private func sendData(data: Data) -> Void {
         guard let peers = self.Session?.connectedPeers else {
             print("No session found.")
@@ -151,8 +184,9 @@ class MultipeerManager: NSObject {
     }
     
     // module methods
-    func launchRoom() -> Void {
-        createSession(sessionName: "default-session")
+    func launchSession(sessionName: String) -> Void {
+        createSession(sessionName: sessionName)
+        inviteNeighborsToSession()
     }
     
     func handleInvitationResponse(sessionName: String, accept: Bool) {
@@ -164,7 +198,7 @@ class MultipeerManager: NSObject {
         self.PendingInvitations.removeValue(forKey: sessionName)
     }
     
-    func leaveRoom() -> Void {
+    func leaveSession() -> Void {
         disconnectSession()
     }
     
@@ -235,8 +269,8 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
         browser.invitePeer(
             peerID,
             to: session,
-            withContext: session.description.data(using: .utf8),
-            timeout: 120
+            withContext: self.SessionName.data(using: .utf8),
+            timeout: self.InviteDuration
         )
     }
 

@@ -11,12 +11,8 @@ public class MultipeerConnectivityModule: Module {
             MultipeerManager.shared.delegate = self
         }
 
-        Function("createRoom") { (sessionName: String) -> Void in
-            MultipeerManager.shared.launchRoom()
-        }
-
-        Function("leaveRoom") { () -> Void in
-            MultipeerManager.shared.leaveRoom()
+        Function("createSession") { (sessionName: String) -> Void in
+            MultipeerManager.shared.launchSession(sessionName: sessionName)
         }
         
         Function("joinSession") { (sessionName: String) -> Void in
@@ -24,6 +20,10 @@ public class MultipeerConnectivityModule: Module {
                 sessionName: sessionName,
                 accept: true
             )
+        }
+        
+        Function("leaveSession") { () -> Void in
+            MultipeerManager.shared.leaveSession()
         }
         
         Function("sendMessage") { (message: String, sender: String) -> Void in
