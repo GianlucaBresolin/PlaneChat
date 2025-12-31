@@ -1,18 +1,37 @@
-import { View } from "react-native";
+import { Styles } from "@/constants/theme";
+import { useState } from "react";
+import { Modal, View } from "react-native";
+import CreateSessionForm from "./CreateSessionForm";
 import IconButton, { IconButtonProps } from "./IconButton";
 
-export function LaunchRoom() {
+export default function LaunchRoom() {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
     return (
-        <View>
+        <View
+            style={Styles.launchRoom}    
+        >
             <IconButton 
                 props={{
-                    title: "Launch",
+                    title: "Launch Session",
                     onPress: () => {
-                        console.log("Launch Room Pressed");
+                        setIsModalVisible(true);
+                        console.log("Launch Session Pressed");
                     },
                     iconName: "airplane"
                 } as IconButtonProps}
             />
+            <Modal
+            animationType ="fade"
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={() => {
+                setIsModalVisible(false);
+            }}>
+                <CreateSessionForm 
+                    closeForm={() => setIsModalVisible(false)}    
+                />
+            </Modal>
         </View>
     );
 }
