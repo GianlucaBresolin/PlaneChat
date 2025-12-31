@@ -1,14 +1,19 @@
 import { NativeModule, requireNativeModule } from 'expo';
-import { ReceivedMessage } from './MultipeerConnectivityModule.types';
+import { FoundSessionEvent, ReceivedMessageEvent } from './MultipeerConnectivityModule.types';
 
 type MultipeerConnectivityModuleEvents = {
-  onReceivedMessage: (event: ReceivedMessage) => void;
+  onFoundSession: (event: FoundSessionEvent) => void;
+  onReceivedMessage: (event: ReceivedMessageEvent) => void;
 };
 
 declare class MultipeerConnectivityModule extends NativeModule<MultipeerConnectivityModuleEvents> {
-  initialize(): void;
-  createRoom(): void;
-  leaveRoom(): void;
+  createSession(
+    sessionName: string,
+  ): void;
+  joinSession(
+    sessionName: string,
+  ): void;
+  leaveSession(): void;
   sendMessage(
     sender: string,
     message: string

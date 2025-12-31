@@ -1,19 +1,21 @@
 import { EventSubscription } from 'expo-modules-core';
 import MultipeerConnectivityModule from './MultipeerConnectivityModule';
-import { ReceivedMessage } from './MultipeerConnectivityModule.types';
+import { FoundSessionEvent, ReceivedMessageEvent } from './MultipeerConnectivityModule.types';
 
-export function addReceivedMessageListener(
-    listener: (event: ReceivedMessage) => void 
-): EventSubscription {
-    return MultipeerConnectivityModule.addListener("onReceivedMessage", listener);
+export function createSession(
+    sessionName: string,
+): void {
+    return MultipeerConnectivityModule.createSession(sessionName);
 }
 
-export function createRoom(): void {
-    return MultipeerConnectivityModule.createRoom();
+export function joinSession(
+    sessionName: string,
+): void {
+    return MultipeerConnectivityModule.joinSession(sessionName);
 }
 
-export function leaveRoom(): void {
-    return MultipeerConnectivityModule.leaveRoom();
+export function leaveSession(): void {
+    return MultipeerConnectivityModule.leaveSession();
 }
 
 export function sendMessage(
@@ -23,6 +25,21 @@ export function sendMessage(
     return MultipeerConnectivityModule.sendMessage(sender, message);
 }
 
-export { MultipeerConnectivityModule };
-export type { ReceivedMessage };
+// Listener for events
+export function addFoundSessionListener(
+    listener: (event: FoundSessionEvent) => void
+): EventSubscription {
+    return MultipeerConnectivityModule.addListener("onFoundSession", listener);
+}
+
+export function addReceivedMessageListener(
+    listener: (event: ReceivedMessageEvent) => void 
+): EventSubscription {
+    return MultipeerConnectivityModule.addListener("onReceivedMessage", listener);
+}
+
+export type {
+    FoundSessionEvent,
+    ReceivedMessageEvent
+};
 

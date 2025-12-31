@@ -6,7 +6,7 @@ public class MultipeerConnectivityModule: Module {
 
         Events("foundSession", "receivedMessage")
 
-        Function("initialize") {() -> Void in
+        OnCreate {
             // init Manager and assign delegate
             MultipeerManager.shared.delegate = self
         }

@@ -142,25 +142,32 @@ class MultipeerManager: NSObject {
     
     private func inviteNeighborsToSession() -> Void {
         let neighbors = self.Neighbors
-        guard neighbors.isEmpty == false else {
-            // no neighbors founded
-            return
-        }
-        guard let browser = self.Browser else {
-            print("Error: no available browser")
-            return
-        }
-        guard let session = self.Session else {
-            print("Error: no available session")
-            return
-        }
-        for peerID in neighbors {
-            browser.invitePeer(
-                peerID,
-                to: session,
-                withContext: self.SessionName.data(using: .utf8),
-                timeout: self.InviteDuration
-            )
+        if neighbors.isEmpty == false {
+            guard let browser = self.Browser else {
+                print("Error: no available browser")
+                return
+            }
+            guard let session = self.Session else {
+                print("Error: no available session")
+                return
+            }
+            let sessionName = self.SessionName
+            guard sessionName != "" else {
+                print("Invalid session name: can not invite peer")
+                return
+            }
+            guard let sessionNameData = sessionName.data(using: .utf8) else {
+                print("Error converting session name to data")
+                return
+            }
+            for peerID in neighbors {
+                browser.invitePeer(
+                    peerID,
+                    to: session,
+                    withContext: sessionNameData,
+                    timeout: self.InviteDuration
+                )
+            }
         }
     }
     
@@ -266,10 +273,19 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
             print("Error: no browser available")
             return
         }
+        let sessionName = self.SessionName
+        guard sessionName != "" else {
+            print("Invalid session name: can not invite peer")
+            return
+        }
+        guard let sessionNameData = sessionName.data(using: .utf8) else {
+            print("Error converting session name to data")
+            return
+        }
         browser.invitePeer(
             peerID,
             to: session,
-            withContext: self.SessionName.data(using: .utf8),
+            withContext: sessionNameData,
             timeout: self.InviteDuration
         )
     }
