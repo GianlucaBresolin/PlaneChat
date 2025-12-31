@@ -1,27 +1,15 @@
-import { MultipeerConnectivityModule, ReceivedMessage } from "multipeer-connectivity-module";
-import { useEffect } from "react";
 import { View } from "react-native";
-import { LaunchRoom } from "../components/LaunchRoom";
+import AvailableSessions from "../components/AvailableSessions";
+import LaunchRoom from "../components/LaunchRoom";
+import { Styles } from "../constants/theme";
 
 export default function Index() {
-  useEffect(() => {
-    const subscription = MultipeerConnectivityModule.addReceivedMessageListener((event: ReceivedMessage) => {
-      // Handle received message
-      console.log(`Message from ${event.sender}: ${event.message}`);
-    });
-
-    return () => subscription.remove();
-  }, []);
-
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      style={Styles.container}
     >
-      <LaunchRoom />
+      <AvailableSessions/>
+      <LaunchRoom/>
     </View>
   );
 }
