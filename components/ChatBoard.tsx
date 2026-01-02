@@ -29,7 +29,9 @@ export default function ChatBoard({username}: {username: string}) {
                             console.log("Send message:", message);
                             setMessage("");
                         },
+                        styleSheet: Styles.buttonHeader,
                         iconName: "send",
+                        size: 16,
                     } as IconButtonProps}
                 />
             </View>
