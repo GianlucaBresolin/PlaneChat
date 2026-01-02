@@ -11,6 +11,7 @@ export const Styles = StyleSheet.create({
         backgroundColor: "#E3E3E3"
     },
 
+    // TEXT STYLES
     textPrimary: {
         color: "#1B3C53"
     },
@@ -45,6 +46,7 @@ export const Styles = StyleSheet.create({
         marginBottom: 10
     },
 
+    // BUTTON STYLES
     button: {
         backgroundColor: "#456882",
         borderRadius: 8,
@@ -56,6 +58,7 @@ export const Styles = StyleSheet.create({
 
     buttonHeader: {
         backgroundColor: "#1B3C53",
+        color: "#FFFFFF",
         borderRadius: 8,
         padding: 10,
         marginRight: ScreenWidth * 0.03,
@@ -69,6 +72,15 @@ export const Styles = StyleSheet.create({
         margin: 5,
         fontWeight: "bold"
     }, 
+
+    closeButton: {
+        backgroundColor: "#FF0000",
+        color: "#FFFFFF",
+        borderRadius: 20,
+        margin: 6,
+        flexDirection: "row",
+        alignItems: "center",
+    },
 
     textInput: {
         borderWidth: 1,
@@ -88,6 +100,7 @@ export const Styles = StyleSheet.create({
         bottom: ScreenHeight * 0.20,
     },
 
+    // MODAL STYLES
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -117,6 +130,7 @@ export const Styles = StyleSheet.create({
         paddingBottom: 10
     }, 
 
+    // CHATBOARD STYLES
     chatBoard: {
         flex: 1,
         flexDirection: "row",

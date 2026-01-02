@@ -17,6 +17,25 @@ export default function CreateSessionForm( {closeForm}: { closeForm: () => void 
             <View
                 style={Styles.modalContent}
             >
+                <View
+                    style={{
+                        position: "absolute",
+                        top: 10,
+                        right: 10
+                    }}
+                >
+                    <IconButton
+                        props={{
+                            title: "",
+                            onPress: () => {
+                                closeForm();
+                            },
+                            iconName: "close",
+                            size: 15,
+                            styleSheet: Styles.closeButton
+                        } as IconButtonProps}
+                    />
+                </View>
                 <Text 
                     style={Styles.textLabel}
                 >
