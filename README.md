@@ -18,7 +18,7 @@ Framework](https://developer.apple.com/documentation/multipeerconnectivity).
    ```bash
    npx expo run:ios
    ```
-(An iOS development environment is required to run the app on a simulator).
+   (An iOS development environment is required to run the app on a simulator).
 ---
 ## Technologies Used
 - [React Native](https://reactnative.dev/)
