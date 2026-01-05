@@ -13,6 +13,9 @@ class MultipeerManager: NSObject {
     // Delegate
     weak var delegate: MultipeerManagerDelegate?
     
+    // Dispatching Queue for thread-safety
+    private let isolationQueue: DispatchQueue
+    
     // Private Data
     private var PeerID: MCPeerID
     private var Session: MCSession?
@@ -41,6 +44,8 @@ class MultipeerManager: NSObject {
                 UserDefaults.standard.set(data, forKey: "mc-peer-id")
             }
         }
+        // create dispatch queue
+        self.isolationQueue = DispatchQueue(label: "multipeer-manager-isolation-queue")
         super.init()
         // MCNearbyServiceBrowser
         createBrowser()
@@ -58,135 +63,185 @@ class MultipeerManager: NSObject {
         
     // Multipeer Connectivity Logic
     private func createSession(sessionName: String) -> Void {
-        guard self.Session == nil else {
-            print("A session already exists.")
-            return
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard self.Session == nil else {
+                print("A session already exists.")
+                return
+            }
+            let newSession = MCSession(
+                peer: self.PeerID,
+                
+            )
+            newSession.delegate = self
+            self.Session = newSession
+            self.SessionName = sessionName
         }
-        let newSession = MCSession(
-            peer: self.PeerID,
-            
-        )
-        newSession.delegate = self
-        self.Session = newSession
-        self.SessionName = sessionName
     }
     
     private func disconnectSession() -> Void {
-        guard let session = self.Session else {
-            print("No session to disconnect.")
-            return
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard let session = self.Session else {
+                print("No session to disconnect.")
+                return
+            }
+            session.disconnect()
+            self.Session = nil
+            self.SessionName = ""
         }
-        session.disconnect()
-        self.Session = nil
-        self.SessionName = ""
     }
     
     private func createBrowser() -> Void {
-        guard self.Browser == nil else {
-            print("A browser already exists.")
-            return
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard self.Browser == nil else {
+                print("A browser already exists.")
+                return
+            }
+            let browser = MCNearbyServiceBrowser(
+                peer: self.PeerID,
+                serviceType: "plane-chat"
+            )
+            browser.delegate = self
+            self.Browser = browser
         }
-        let browser = MCNearbyServiceBrowser(
-            peer: self.PeerID,
-            serviceType: "plane-chat"
-        )
-        browser.delegate = self
-        self.Browser = browser
     }
     
     private func startBrowsing() -> Void {
-        guard let browser = self.Browser else {
-            print("Error: no available browser")
-            return
-        }
-        browser.startBrowsingForPeers()
-    }
-    
-    private func stopBrowsing() -> Void {
-        guard let browser = self.Browser else {
-            print("Error: no available browser")
-            return
-        }
-        browser.stopBrowsingForPeers()
-    }
-    
-    private func createAdvertiser() -> Void {
-        guard self.Advertiser == nil else {
-            print("An advertiser already exists")
-            return
-        }
-        let advertiser = MCNearbyServiceAdvertiser(
-            peer: self.PeerID,
-            discoveryInfo: nil,
-            serviceType: "plane-chat"
-        )
-        advertiser.delegate = self
-        self.Advertiser = advertiser
-    }
-    
-    private func startAdvertising() -> Void {
-        guard let advertiser = self.Advertiser else {
-            print("Error: no available advertiser")
-            return
-        }
-        advertiser.startAdvertisingPeer()
-    }
-    
-    private func stopAdvertising() -> Void {
-        guard let advertiser = self.Advertiser else {
-            print("Error: no available advertiser")
-            return
-        }
-        advertiser.stopAdvertisingPeer()
-    }
-    
-    private func inviteNeighborsToSession() -> Void {
-        let neighbors = self.Neighbors
-        if neighbors.isEmpty == false {
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
             guard let browser = self.Browser else {
                 print("Error: no available browser")
                 return
             }
-            guard let session = self.Session else {
-                print("Error: no available session")
+            browser.startBrowsingForPeers()
+        }
+    }
+    
+    private func stopBrowsing() -> Void {
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
                 return
             }
-            let sessionName = self.SessionName
-            guard sessionName != "" else {
-                print("Invalid session name: can not invite peer")
+            guard let browser = self.Browser else {
+                print("Error: no available browser")
                 return
             }
-            guard let sessionNameData = sessionName.data(using: .utf8) else {
-                print("Error converting session name to data")
+            browser.stopBrowsingForPeers()
+        }
+    }
+    
+    private func createAdvertiser() -> Void {
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
                 return
             }
-            for peerID in neighbors {
-                browser.invitePeer(
-                    peerID,
-                    to: session,
-                    withContext: sessionNameData,
-                    timeout: self.InviteDuration
-                )
+            guard self.Advertiser == nil else {
+                print("An advertiser already exists")
+                return
+            }
+            let advertiser = MCNearbyServiceAdvertiser(
+                peer: self.PeerID,
+                discoveryInfo: nil,
+                serviceType: "plane-chat"
+            )
+            advertiser.delegate = self
+            self.Advertiser = advertiser
+        }
+    }
+    
+    private func startAdvertising() -> Void {
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard let advertiser = self.Advertiser else {
+                print("Error: no available advertiser")
+                return
+            }
+            advertiser.startAdvertisingPeer()
+        }
+    }
+    
+    private func stopAdvertising() -> Void {
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard let advertiser = self.Advertiser else {
+                print("Error: no available advertiser")
+                return
+            }
+            advertiser.stopAdvertisingPeer()
+        }
+    }
+    
+    private func inviteNeighborsToSession() -> Void {
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            let neighbors = self.Neighbors
+            if neighbors.isEmpty == false {
+                guard let browser = self.Browser else {
+                    print("Error: no available browser")
+                    return
+                }
+                guard let session = self.Session else {
+                    print("Error: no available session")
+                    return
+                }
+                let sessionName = self.SessionName
+                guard sessionName != "" else {
+                    print("Invalid session name: can not invite peer")
+                    return
+                }
+                guard let sessionNameData = sessionName.data(using: .utf8) else {
+                    print("Error converting session name to data")
+                    return
+                }
+                for peerID in neighbors {
+                    browser.invitePeer(
+                        peerID,
+                        to: session,
+                        withContext: sessionNameData,
+                        timeout: self.InviteDuration
+                    )
+                }
             }
         }
     }
     
     private func sendData(data: Data) -> Void {
-        guard let peers = self.Session?.connectedPeers else {
-            print("No session found.")
-            return
-        }
-        guard !peers.isEmpty else {
-            return
-        }
-        do {
-            try self.Session?.send(
-                data,
-                toPeers: peers,
-                with: .reliable
-            )
-        } catch {
-            print("Error sending data: \(error)")
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard let peers = self.Session?.connectedPeers else {
+                print("No session found.")
+                return
+            }
+            guard !peers.isEmpty else {
+                return
+            }
+            do {
+                try self.Session?.send(
+                    data,
+                    toPeers: peers,
+                    with: .reliable
+                )
+            } catch {
+                print("Error sending data: \(error)")
+            }
         }
     }
     
@@ -197,12 +252,17 @@ class MultipeerManager: NSObject {
     }
     
     func handleInvitationResponse(sessionName: String, accept: Bool) {
-        guard let invitationHandler = self.PendingInvitations[sessionName] else {
-            print("Error: no invitation found for session: \(sessionName)")
-            return
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            guard let invitationHandler = self.PendingInvitations[sessionName] else {
+                print("Error: no invitation found for session: \(sessionName)")
+                return
+            }
+            invitationHandler(accept, self.Session)
+            self.PendingInvitations.removeValue(forKey: sessionName)
         }
-        invitationHandler(accept, self.Session)
-        self.PendingInvitations.removeValue(forKey: sessionName)
     }
     
     func leaveSession() -> Void {
@@ -211,7 +271,7 @@ class MultipeerManager: NSObject {
     
     func sendMessage(sender: String, message: String) -> Void {
         let payload = "\(sender)|\(message)"
-            
+    
         guard let data = payload.data(using: .utf8) else {
             print("Error encoding data.")
             return
@@ -262,39 +322,49 @@ extension MultipeerManager: MCSessionDelegate {
 extension MultipeerManager: MCNearbyServiceBrowserDelegate {
     // call when found a peer
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
-        // save to our peers
-        self.Neighbors.append(peerID)
-        
-        guard let session = self.Session else {
-            return
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            // save to our peers
+            self.Neighbors.append(peerID)
+            
+            guard let session = self.Session else {
+                return
+            }
+            // send request to join our session
+            guard let browser = self.Browser else {
+                print("Error: no browser available")
+                return
+            }
+            let sessionName = self.SessionName
+            guard sessionName != "" else {
+                print("Invalid session name: can not invite peer")
+                return
+            }
+            guard let sessionNameData = sessionName.data(using: .utf8) else {
+                print("Error converting session name to data")
+                return
+            }
+            browser.invitePeer(
+                peerID,
+                to: session,
+                withContext: sessionNameData,
+                timeout: self.InviteDuration
+            )
         }
-        // send request to join our session
-        guard let browser = self.Browser else {
-            print("Error: no browser available")
-            return
-        }
-        let sessionName = self.SessionName
-        guard sessionName != "" else {
-            print("Invalid session name: can not invite peer")
-            return
-        }
-        guard let sessionNameData = sessionName.data(using: .utf8) else {
-            print("Error converting session name to data")
-            return
-        }
-        browser.invitePeer(
-            peerID,
-            to: session,
-            withContext: sessionNameData,
-            timeout: self.InviteDuration
-        )
     }
 
     // call when a peer is lost
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        // remove it from saved peers (if present)
-        if let index = self.Neighbors.firstIndex(of: peerID) {
-            self.Neighbors.remove(at: index)
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            // remove it from saved peers (if present)
+            if let index = self.Neighbors.firstIndex(of: peerID) {
+                self.Neighbors.remove(at: index)
+            }
         }
     }
 }
@@ -318,6 +388,11 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate {
             )
         }
         // store invitationHandler
-        self.PendingInvitations[sessionName] = invitationHandler
+        isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.PendingInvitations[sessionName] = invitationHandler
+        }
     }
 }
