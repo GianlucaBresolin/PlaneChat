@@ -19,16 +19,18 @@ class MultipeerManager: NSObject {
     // Private Data
     private var PeerID: MCPeerID
     private var Session: MCSession?
-    private var SessionName : String = ""
+    private var SessionName : String?
     private var Browser: MCNearbyServiceBrowser?
     private var Advertiser: MCNearbyServiceAdvertiser?
-    private var PendingInvitations: [String: (Bool, MCSession?) -> Void] = [:]
+    private var PendingInvitations: [String: (Bool, MCSession?) -> Void]
     private var Neighbors: [MCPeerID] = []
     
     // Constants
     private let InviteDuration: TimeInterval = 120
         
     override init() {
+        // dispatch queue
+        self.isolationQueue = DispatchQueue(label: "multipeer-manager-isolation-queue")
         // PeerID
         if let data = UserDefaults.standard.data(forKey: "mc-peer-id"),
            let savedPeerID = try? NSKeyedUnarchiver.unarchivedObject(ofClass: MCPeerID.self, from: data) {
@@ -44,9 +46,11 @@ class MultipeerManager: NSObject {
                 UserDefaults.standard.set(data, forKey: "mc-peer-id")
             }
         }
-        // create dispatch queue
-        self.isolationQueue = DispatchQueue(label: "multipeer-manager-isolation-queue")
+        // pending invitations
+        self.PendingInvitations = [:]
+        
         super.init()
+        
         // MCNearbyServiceBrowser
         createBrowser()
         startBrowsing()
@@ -56,9 +60,17 @@ class MultipeerManager: NSObject {
     }
     
     deinit {
-        // to do
-        stopBrowsing()
-        stopAdvertising()
+        self.Session?.disconnect()
+        self.Browser?.stopBrowsingForPeers()
+        self.Advertiser?.stopAdvertisingPeer()
+
+        // remove delegates
+        self.Browser?.delegate = nil
+        self.Advertiser?.delegate = nil
+        self.Session?.delegate = nil
+
+        // remove pending closures
+        self.PendingInvitations.removeAll()
     }
         
     // Multipeer Connectivity Logic
@@ -205,10 +217,11 @@ class MultipeerManager: NSObject {
                     print("Invalid session name: can not invite peer")
                     return
                 }
-                guard let sessionNameData = sessionName.data(using: .utf8) else {
+                guard let sessionNameData = sessionName?.data(using: .utf8) else {
                     print("Error converting session name to data")
                     return
                 }
+
                 for peerID in neighbors {
                     browser.invitePeer(
                         peerID,
@@ -233,6 +246,7 @@ class MultipeerManager: NSObject {
             guard !peers.isEmpty else {
                 return
             }
+
             do {
                 try self.Session?.send(
                     data,
@@ -330,6 +344,7 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
             self.Neighbors.append(peerID)
             
             guard let session = self.Session else {
+                // no session available: do nothing
                 return
             }
             // send request to join our session
@@ -342,7 +357,7 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
                 print("Invalid session name: can not invite peer")
                 return
             }
-            guard let sessionNameData = sessionName.data(using: .utf8) else {
+            guard let sessionNameData = sessionName?.data(using: .utf8) else {
                 print("Error converting session name to data")
                 return
             }
