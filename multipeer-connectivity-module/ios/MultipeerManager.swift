@@ -296,10 +296,26 @@ class MultipeerManager: NSObject {
 }
 
 extension MultipeerManager: MCSessionDelegate {
-    
-    // call when a peer change state (connect/disconnect)
+    // call when a peer change state (connect/disconnect/connecting)
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        // to do
+        self.isolationQueue.async { [weak self] in
+            guard let self = self else {
+                return
+            }
+            switch state {
+            case .connected:
+                guard let peerIndex = self.Neighbors.firstIndex(of: peerID) else {
+                    break
+                }
+                self.Neighbors.remove(at: peerIndex)
+            case .notConnected:
+                break
+            case .connecting:
+                break
+            @unknown default:
+                break
+            }
+        }
     }
 
     // call when a message is received
@@ -340,8 +356,10 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
             guard let self = self else {
                 return
             }
-            // save to our peers
-            self.Neighbors.append(peerID)
+            // save to our peers (if not already present)
+            guard self.Neighbors.contains(PeerID) else {
+                self.Neighbors.append(peerID)
+            }
             
             guard let session = self.Session else {
                 // no session available: do nothing
