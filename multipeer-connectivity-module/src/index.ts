@@ -1,21 +1,21 @@
 import { EventSubscription } from 'expo-modules-core';
 import MultipeerConnectivityModule from './MultipeerConnectivityModule';
-import { FoundSessionEvent, ReceivedMessageEvent } from './MultipeerConnectivityModule.types';
+import { FoundGroupEvent, ReceivedMessageEvent } from './MultipeerConnectivityModule.types';
 
-export function createSession(
-    sessionName: string,
+export function createGroup(
+    groupName: string,
 ): void {
-    return MultipeerConnectivityModule.createSession(sessionName);
+    return MultipeerConnectivityModule.createGroup(groupName);
 }
 
-export function joinSession(
-    sessionName: string,
+export function joinGroup(
+    groupName: string,
 ): void {
-    return MultipeerConnectivityModule.joinSession(sessionName);
+    return MultipeerConnectivityModule.joinGroup(groupName);
 }
 
-export function leaveSession(): void {
-    return MultipeerConnectivityModule.leaveSession();
+export function leaveGroup(): void {
+    return MultipeerConnectivityModule.leaveGroup();
 }
 
 export function sendMessage(
@@ -26,10 +26,10 @@ export function sendMessage(
 }
 
 // Listener for events
-export function addFoundSessionListener(
-    listener: (event: FoundSessionEvent) => void
+export function addFoundGroupListener(
+    listener: (event: FoundGroupEvent) => void
 ): EventSubscription {
-    return MultipeerConnectivityModule.addListener("onFoundSession", listener);
+    return MultipeerConnectivityModule.addListener("onFoundGroup", listener);
 }
 
 export function addReceivedMessageListener(
@@ -39,7 +39,7 @@ export function addReceivedMessageListener(
 }
 
 export type {
-    FoundSessionEvent,
+    FoundGroupEvent,
     ReceivedMessageEvent
 };
 

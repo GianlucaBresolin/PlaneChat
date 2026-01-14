@@ -1,4 +1,4 @@
-export type Session = string;
+export type Group = string;
 
 export type Message = {
     sender: string;

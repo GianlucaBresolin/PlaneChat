@@ -1,12 +1,12 @@
 import { useRouter } from "expo-router";
-import { createSession } from "multipeer-connectivity-module";
+import { createGroup } from "multipeer-connectivity-module";
 import { useState } from "react";
 import { Alert, Text, TextInput, View } from "react-native";
 import { Styles } from "../constants/theme";
 import IconButton, { IconButtonProps } from "./IconButton";
 
-export default function CreateSessionForm( {closeForm}: { closeForm: () => void }) { 
-    const [sessionName, setSessionName] = useState("");
+export default function CreateGroupForm( {closeForm}: { closeForm: () => void }) { 
+    const [groupName, setGroupName] = useState("");
     const [username, setUsername] = useState("");
     const router = useRouter();
 
@@ -39,13 +39,13 @@ export default function CreateSessionForm( {closeForm}: { closeForm: () => void 
                 <Text 
                     style={Styles.textLabel}
                 >
-                    Session Name
+                    Group Name
                 </Text>
                 <TextInput
                     style={Styles.textInput}
-                    placeholder="Session Name"
-                    value = {sessionName}
-                    onChangeText={setSessionName}
+                    placeholder="Group Name"
+                    value = {groupName}
+                    onChangeText={setGroupName}
                 />
                 <Text 
                     style={Styles.textLabel}
@@ -60,14 +60,14 @@ export default function CreateSessionForm( {closeForm}: { closeForm: () => void 
                 />
                 <IconButton
                     props={{
-                        title: "Create Session",
+                        title: "Create Group",
                         onPress: () => {
-                            let trimmedSession = sessionName.trim();
+                            let trimmedGroupName = groupName.trim();
                             let trimmedUsername = username.trim();
-                            if (!trimmedSession && !trimmedUsername) {
+                            if (!trimmedGroupName && !trimmedUsername) {
                                 Alert.alert(
                                     "Error", 
-                                    "Please enter a valid session name and a username: cannot be empty.", [
+                                    "Please enter a valid group name and a username: cannot be empty.", [
                                     {
                                         text: "Close",
                                         onPress: () => {},
@@ -79,10 +79,10 @@ export default function CreateSessionForm( {closeForm}: { closeForm: () => void 
                                     }
                                 );
                                 return;
-                            } else if (!trimmedSession) {
+                            } else if (!trimmedGroupName) {
                                 Alert.alert(
                                     "Error", 
-                                    "Please enter a valid session name: cannot be empty.", [
+                                    "Please enter a valid group name: cannot be empty.", [
                                     {
                                         text: "Close",
                                         onPress: () => {},
@@ -108,13 +108,13 @@ export default function CreateSessionForm( {closeForm}: { closeForm: () => void 
                                 );
                                 return;
                             }
-                            createSession(trimmedSession);
-                            console.log(`Creating session: ${trimmedSession}`);
+                            createGroup(trimmedGroupName);
+                            console.log(`Creating group: ${trimmedGroupName}`);
                             closeForm();
                             router.push({
                                 pathname: "/chat",
                                 params: { 
-                                    sessionName: trimmedSession,
+                                    groupName: trimmedGroupName,
                                     username: trimmedUsername,
                                 }
                             });

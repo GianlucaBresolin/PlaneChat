@@ -1,6 +1,6 @@
 import { View } from "react-native";
-import AvailableSessions from "../components/AvailableSessions";
-import LaunchRoom from "../components/LaunchRoom";
+import AvailableGroups from "../components/AvailableGroups";
+import LaunchGroup from "../components/LaunchGroup";
 import { Styles } from "../constants/theme";
 
 export default function Index() {
@@ -8,8 +8,8 @@ export default function Index() {
     <View
       style={Styles.container}
     >
-      <AvailableSessions/>
-      <LaunchRoom/>
+      <AvailableGroups/>
+      <LaunchGroup/>
     </View>
   );
 }

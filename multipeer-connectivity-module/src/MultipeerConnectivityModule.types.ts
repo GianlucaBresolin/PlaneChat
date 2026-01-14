@@ -1,5 +1,5 @@
-export type FoundSessionEvent = {
-    sessionName: string;
+export type FoundGroupEvent = {
+    groupName: string;
 }
 
 export type ReceivedMessageEvent = {

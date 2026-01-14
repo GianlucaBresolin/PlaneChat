@@ -6,7 +6,7 @@ import ChatThread from "../components/ChatThread";
 import { Styles } from "../constants/theme";
 
 export default function Chat() {
-    const { sessionName, username } = useLocalSearchParams();
+    const { groupName, username } = useLocalSearchParams();
 
     return (
         <>
@@ -14,7 +14,7 @@ export default function Chat() {
                 style={Styles.container}
             >
                 <ChatHeader
-                    sessionName={sessionName as string}
+                    groupName={groupName as string}
                 />
                 <ChatThread 
                     username = {username as string}    

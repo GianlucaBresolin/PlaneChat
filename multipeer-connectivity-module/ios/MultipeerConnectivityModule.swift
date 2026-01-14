@@ -11,19 +11,19 @@ public class MultipeerConnectivityModule: Module {
             MultipeerManager.shared.delegate = self
         }
 
-        Function("createSession") { (sessionName: String) -> Void in
-            MultipeerManager.shared.launchSession(sessionName: sessionName)
+        Function("createGroup") { (groupName: String) -> Void in
+            MultipeerManager.shared.launchGroup(groupName: groupName)
         }
         
-        Function("joinSession") { (sessionName: String) -> Void in
+        Function("joinGroup") { (groupName: String) -> Void in
             MultipeerManager.shared.handleInvitationResponse(
-                sessionName: sessionName,
+                groupName: groupName,
                 accept: true
             )
         }
         
-        Function("leaveSession") { () -> Void in
-            MultipeerManager.shared.leaveSession()
+        Function("leaveGroup") { () -> Void in
+            MultipeerManager.shared.leaveGroup()
         }
         
         Function("sendMessage") { (message: String, sender: String) -> Void in
@@ -36,9 +36,9 @@ public class MultipeerConnectivityModule: Module {
 }
 
 extension MultipeerConnectivityModule: MultipeerManagerDelegate {
-    func notifySession(sessionName: String) {
+    func notifySession(groupName: String) {
         sendEvent("foundSession", [
-            "sessionName" : sessionName
+            "groupName" : groupName
         ])
     }
     

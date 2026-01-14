@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
-import { leaveSession } from "multipeer-connectivity-module";
+import { leaveGroup } from "multipeer-connectivity-module";
 import { Text, View } from "react-native";
 import { Styles } from "../constants/theme";
 import IconButton, { IconButtonProps } from "./IconButton";
 
-export default function ChatHeader({sessionName}: {sessionName: string}) {
+export default function ChatHeader({groupName}: {groupName: string}) {
     const router = useRouter();
     return (
         <>
@@ -14,14 +14,14 @@ export default function ChatHeader({sessionName}: {sessionName: string}) {
                 <Text
                     style={Styles.textHeader}
                 >
-                    {sessionName}
+                    {groupName}
                 </Text>
                 <IconButton 
                     props={{
                         title: "",
                         onPress: () => {
                             console.log("Leaving chat");
-                            leaveSession();
+                            leaveGroup();
                             router.replace("/");
                         },
                         iconName: "log-out", 
