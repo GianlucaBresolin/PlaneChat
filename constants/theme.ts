@@ -154,6 +154,61 @@ export const Styles = StyleSheet.create({
         width: "75%",
         color: "#1B3C53",
         backgroundColor: "#FFFFFF"
+    },
+
+    // CHATTHREAD STYLE
+    chatThread: {
+        flex: 1,
+        marginTop: (ScreenHeight * 0.07) + 55,
+        width: "100%",
+    },
+
+    // MESSAGE STYLES
+    messageContainer: {
+        flexDirection: "column",
+        width: "auto",
+        marginVertical: 5,
+        marginHorizontal: 10,
+        borderRadius: 10,
+        padding: 10,
+    },
+
+    messageContainerMe: {
+        alignSelf: "flex-end",
+        backgroundColor: "#f7f6f6",
+    },
+
+    messageContainerOther: {
+        alignSelf: "flex-start",
+        backgroundColor: "#FFFFFF",
+    }, 
+
+    messageHeader: {
+        alignSelf: "flex-start",
+        marginBottom: 5
+    },
+
+    sender: {
+        fontSize: 14,
+        fontWeight: "bold",
+    },
+
+    senderMe: {
+        color: "#1c5937",
+    },
+
+    senderOther: {
+        color: "#234C6A",
+    },
+
+    messageContentContainer: {
+        alignSelf: "flex-start",
+        width: "80%"
+    },
+
+    messageContent: {
+        fontSize: 14,
+        color: "#1e1f1f",
     }
 });
 

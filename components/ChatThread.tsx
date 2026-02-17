@@ -1,7 +1,9 @@
 import { addReceivedMessageListener, ReceivedMessageEvent } from "multipeer-connectivity-module";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { Styles } from "../constants/theme";
 import { Message } from "../types/planeChat.types";
+import MessageComponent from "./Message";
 
 export default function ChatThread({username} : {username: string}) {
     const [messageThread, setMessageThread] = useState<Message[]>([]); 
@@ -19,10 +21,14 @@ export default function ChatThread({username} : {username: string}) {
 
     return (
         <>
-            <View>
+            <View style={Styles.chatThread}>
                 {messageThread.map((msg, index) => (
                     <View key={index}>
-                        <Text>{msg.sender}: {msg.message}</Text>
+                        <MessageComponent 
+                            sender = {msg.sender}
+                            message = {msg.message}
+                            isMe = {msg.sender === username}
+                        />
                     </View>
                 ))}
             </View>
