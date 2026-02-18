@@ -29,17 +29,81 @@ Plane Chat abstract.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Wireless, Multipeer-Connectivity, Flooding, iOS
+Wireless Ad-Hoc Networks, Multipeer Connectivity, DSDV Protocol, iOS
 \end{IEEEkeywords}
 
 \section{Introduction}
-\section{Multipeer Connectivity Framework}
+Wireless networks have become an integral part of our daily lives, enabling
+communication and connectivity in various environments. Those networks have
+gain a significant importance over the years, especially due to the widespread
+adoption of mobile devices, with applications that rely on wireless
+communication to provide services and functionality. \\
+
+In relation to wired networks, wireless networks present different and unique
+challenges and characteristics that mainly depend on the scenario in which they
+are deployed. Those challenges require the design and implementation of
+specialized protocols and technologies to ensure network operation and
+performance. \\
+Specifically, \textit{ad-hoc} wireless networks do not require any
+pre-existing infrastructure and allow the construction of termporary networks
+with no wires and no administrative intervention required. Ad-hoc networks
+differ significantly from existing wired networks: the lack of physical
+connections between devices indeed allows for greater mobility and flexibility,
+which makes the topology of interconnections dynamic and constantly changing,
+with nodes that have to discover where others are. 
+Moreover, since users will not wish to perform any administrative actions to
+set up such networks, we do not assume that every device is within communication
+range of every other device. Those characteristics make the design of protocols
+for ad-hoc networks particularly challenging, as they must be able to adapt to
+the dynamic nature of the network and to the possible lack of complete
+connectivity. \\
+
+In this report, to investigate the design and implementation challenges of ad-hoc
+wireless networks, we present \textit{Plane Chat}, a mobile \textit{iOS}
+application enabling users to create groups and chat with each other during
+flights. Given the inherent constraints of such environments, the app is
+designed to work in a situation where devices are in close proximity without
+relying on pre-existing infrastructure, such as Wi-Fi access points or cellular 
+networks. Therefore, the app facilitate group creation and message exchange by
+instantiating peer-to-peer connections via the \textit{Multipeer Connectivity}
+framework provided by \textit{Apple}, thereby creating an ad-hoc network. \\
+
+To overcome the \textit{Multipeer Connectivity} limitation of having a maximum of
+eight devices per session and enhance network scalability in order to allow more
+users to join the same group and chat with each other, the application leverages
+the framework as a link-layer substrate. Consequently, we implement the
+\textit{Destination-Sequenced Distance-Vector} (DSDV) routing protocol at the
+network layer to facilitate multi-hop communication between devices. \\
+At the application layer, the message dissemination follows a "best-effort"
+delivery model. To maintain low overhead and simplicity, the protocol does not
+implement any acknowledgement (ACK) mechanism or retransmission logic.
+Consequently, the application operates under an unreliable communication
+paradigm, where the delivery of packets to all nodes is not stricly guaranteed.
+\\
+
+The remainder of this report is organized as follows: Section
+\ref{sec:PlaneChat} provides an overview of the \textit{Plane Chat} application,
+including its features and functionalities. Section
+\ref{sec:DesignAndImplementation} describes the design and implementation of the
+system. Section \ref{sec:ExperimentalSetupAndResults} presents the experimental
+setup and results obtained from testing the application. Finally, Section
+\ref{sec:Conclusions} concludes the report and discusses potential future work
+and improvements for the \textit{Plane Chat} application. 
+
+\section{PlaneChat}
+\label{sec:PlaneChat}
+
 \section{System Design and Implementation}
-\subsection{Flooding Protocol}
-\subsection{Technologies}
-\section{Evaluation}
-\section{Discussion}
+\label{sec:DesignAndImplementation}
+
+\subsection{Multipeer Connectivity Framework}
+\subsection{DSDV Protocol}
+
+\section{Experimental Setup and Results}
+\label{sec:ExperimentalSetupAndResults}
+
 \section{Conclusions}
+\label{sec:Conclusions}
 
 % \begin{table}[htbp]
 % \caption{Table Type Styles}
