@@ -29,13 +29,13 @@ export function sendMessage(
 export function addFoundGroupListener(
     listener: (event: FoundGroupEvent) => void
 ): EventSubscription {
-    return MultipeerConnectivityModule.addListener("onFoundGroup", listener);
+    return MultipeerConnectivityModule.addListener("foundSession", listener);
 }
 
 export function addReceivedMessageListener(
     listener: (event: ReceivedMessageEvent) => void 
 ): EventSubscription {
-    return MultipeerConnectivityModule.addListener("onReceivedMessage", listener);
+    return MultipeerConnectivityModule.addListener("receivedMessage", listener);
 }
 
 export type {

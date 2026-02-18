@@ -2,8 +2,8 @@ import { NativeModule, requireNativeModule } from 'expo';
 import { FoundGroupEvent, ReceivedMessageEvent } from './MultipeerConnectivityModule.types';
 
 type MultipeerConnectivityModuleEvents = {
-  onFoundGroup: (event: FoundGroupEvent) => void;
-  onReceivedMessage: (event: ReceivedMessageEvent) => void;
+  foundSession: (event: FoundGroupEvent) => void;
+  receivedMessage: (event: ReceivedMessageEvent) => void;
 };
 
 declare class MultipeerConnectivityModule extends NativeModule<MultipeerConnectivityModuleEvents> {
