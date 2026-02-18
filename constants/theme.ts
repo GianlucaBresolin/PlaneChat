@@ -39,6 +39,15 @@ export const Styles = StyleSheet.create({
         bottom: 19
     },
 
+    textHeaderModal: {
+        fontSize: 16,
+        color: "#1B3C53",
+        fontWeight: "600",
+        width: "80%",
+        textAlign: "center",
+        paddingBottom: 25
+    },
+
     heading: {
         fontSize: 24,
         color: "#1B3C53",
@@ -78,6 +87,15 @@ export const Styles = StyleSheet.create({
         color: "#FFFFFF",
         borderRadius: 20,
         margin: 6,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    joinGroupButton: {
+        backgroundColor: "#456882",
+        color: "#FFFFFF",
+        borderRadius: 8,
+        padding: 5,
         flexDirection: "row",
         alignItems: "center",
     },
@@ -129,6 +147,20 @@ export const Styles = StyleSheet.create({
         justifyContent: "flex-end",
         paddingBottom: 10
     }, 
+
+    // AVAILABLE GROUP
+    GroupItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 5,
+        paddingHorizontal: 8,
+        paddingLeft: 15,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 8,
+        marginBottom: 5,
+        width: "80%"
+    },
 
     // CHATBOARD STYLES
     chatBoard: {
