@@ -26,7 +26,6 @@ export default function ChatBoard({username}: {username: string}) {
                                 username, 
                                 message
                             );
-                            console.log("Send message:", message);
                             setMessage("");
                         },
                         styleSheet: Styles.buttonHeader,
@@ -35,6 +34,7 @@ export default function ChatBoard({username}: {username: string}) {
                     } as IconButtonProps}
                 />
             </View>
+            <View style={Styles.underChatboard}></View>
         </>
     );  
 }

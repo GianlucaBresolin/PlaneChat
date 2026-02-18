@@ -175,6 +175,14 @@ export const Styles = StyleSheet.create({
         backgroundColor: "#234C6A",
     },
 
+    underChatboard: {
+        height: ScreenHeight * 0.2,
+        position: "absolute",
+        bottom: -(ScreenHeight * 0.2),
+        width: "100%",
+        backgroundColor: "#234C6A",
+    },
+
     chatTextInput: {
         borderWidth: 1,
         borderColor: "#456882",
