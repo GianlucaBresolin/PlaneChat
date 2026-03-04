@@ -7,12 +7,14 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+\usepackage{float}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
 \title{Plane Chat: Technical Report\\
-{\footnotesize Project for the course \textit{Wireless Networks For Mobile Applications}}
+{\footnotesize \textit{Wireless Networks For Mobile Applications} Project}
 }
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Gianluca Bresolin}
@@ -68,18 +70,18 @@ networks. Therefore, the app facilitate group creation and message exchange by
 instantiating peer-to-peer connections via the \textit{Multipeer Connectivity}
 framework provided by \textit{Apple}, thereby creating an ad-hoc network. \\
 
-To overcome the \textit{Multipeer Connectivity} limitation of having a maximum of
-eight devices per session and enhance network scalability in order to allow more
-users to join the same group and chat with each other, the application leverages
-the framework as a link-layer substrate. Consequently, we implement the
-\textit{Destination-Sequenced Distance-Vector} (DSDV) routing protocol at the
-network layer to facilitate multi-hop communication between devices. \\
-At the application layer, the message dissemination follows a "best-effort"
-delivery model. To maintain low overhead and simplicity, the protocol does not
-implement any acknowledgement (ACK) mechanism or retransmission logic.
-Consequently, the application operates under an unreliable communication
-paradigm, where the delivery of packets to all nodes is not stricly guaranteed.
-\\
+To overcome the \textit{Multipeer Connectivity} limitations and enhance network
+scalability in order to allow more users to join the same group and chat with
+each other, the application leverages the framework as a link-layer substrate.
+Consequently, we implement the \textit{Destination-Sequenced Distance-Vector}
+(DSDV) routing protocol at the network layer to facilitate multi-hop
+communication between devices. Finally, the application layer provides the
+application logic following a "best-effort" delivery model. To maintain low
+overhead and simplicity, the protocol does not implement any acknowledgement
+(ACK) mechanism or retransmission logic. Consequently, the application operates
+under an unreliable communication paradigm, where the delivery of packets to all
+nodes is not stricly guaranteed. \\
+% sposto details in application layer section
 
 The remainder of this report is organized as follows: Section
 \ref{sec:PlaneChat} provides an overview of the \textit{Plane Chat} application,
@@ -92,12 +94,338 @@ and improvements for the \textit{Plane Chat} application.
 
 \section{PlaneChat}
 \label{sec:PlaneChat}
+\textit{Plane Chat} is an \textit{iOS} mobile application designed to facilitate
+ad-hoc group communication during flights, without relying on pre-existing
+infrastructure. The application is specifically engineered to operate in
+"Ariplane Mode", where cellular and Wi-Fi services are restricted, leveraging
+Bluetooth connections as transport for data exchange between devices. \\
+
+Upon launch, the application a graphical interface that enables users to either
+create a group or discover and join an existing one in close proximity, as
+illustrated in Figure \ref{fig:initial_screen}. \\ 
+
+\begin{figure}[H]
+\centerline{\includegraphics[width=0.3\textwidth]{assets/initial_screen.png}}
+\caption{Initial user interface of PlaneChat.}
+\label{fig:initial_screen}
+\end{figure}
+
+To create a group, the user must provide a valid group name, serving as an
+identigier for the group to other users, and a valid username that will be
+associated with each of his/her messages. Both fields must be not empty to allow
+the user to proceeed with the group creation, otherwise an allert with an
+appropriate error message will be displayed, preventing the group creation until
+valid inputs are provided. \\
+Conversely, the "Available Groups" section dynamically populates a list of
+nearby groups that the user can join, identified by the group names defined by
+their respective founders and followed by a "Join" button. Once the user taps on
+this button, the application initiates the joining process, which requires to
+provide a valid username that will be associated with each message sent in the
+group by the user. Again, this attribute must be not empty, otherwise an allert
+with an appropriate error message will prevent the user from joining the group
+until a valid username is provided. \\ 
+
+Once a group is created on joined successfully, the user will be
+redirected to the group chat interface, as shown in Figure \ref{fig:chat_screen}.
+
+\begin{figure}[H]
+\centerline{\includegraphics[width=0.3\textwidth]{assets/initial_screen.png}}
+\caption{Group conversation interface in PlaneChat.}
+\label{fig:chat_screen}
+\end{figure}
+
+The application provides a streamlined chat layout, with the group name
+displayed at the top of the screen. The main interface hosts the conversation
+history, where each message is rendered as a bubble containing the sender's
+username and the text content. Users can type a messages via the input field at
+the bottom of the screen. Upon tapping the "Send" button, the message is
+broadcasted to all other users that are currently part of the same group. \\
+
+Finally, the user can leave the group by tapping the "Leave" button at the top
+right corner of the screen: this action will remove the user from the group and 
+redirect the application to the initial interface. If the device remains within
+signal range, the previously exited group continues to be displayed in the
+"Available Groups" section, enabling the user to re-join it if desired.
 
 \section{System Design and Implementation}
 \label{sec:DesignAndImplementation}
+\textit{Plane Chat} is designed to enable users to create groups and chat under
+the constraints of an environemnt where devices can not rely on pre-existing
+infrastructure. To enable communication between devices, the application relies
+on peer-to-peer connections, which are established by leveraging the
+\textit{Multipeer Connectivity} framework provided by \textit{Apple}.\\
+To overcome the limitation of having a maximum of eight devices per session, the
+application uses the \textit{Multipeer Connectivity} framework as a link-layer
+substrate, implementing the \textit{Destination-Sequenced Distance-Vector}
+(DSDV) routing protocol at the network layer to facilitate multi-hop
+communication between devices.\\ 
+At the top of the protocol stack, a custom application layer protocol defines
+the application data exchange regarding group and message management. These
+network operations are triggered by the business logic of the application,
+following a "best-effort" delivery model. \\
 
-\subsection{Multipeer Connectivity Framework}
-\subsection{DSDV Protocol}
+\subsection{Link Layer: Multipeer Connectivity Framework}
+The \textit{Multipeer Connectivity} framework is the official solution provided
+by \textit{Apple} for peer-to-peer communication between nearby devices. The
+framework supports the discovery of services provided by proximal devices and
+supports communicating with those services through message-based data, streaming
+data, and resources (such as files). \\
+In \textit{iOS}, the framework uses infrastructure Wi-Fi networks, peer-to-peer
+Wi-Fi, and Bluetooth personal area networks for the underlying transport. \\ 
+For the scope of this project, communications are handled via message-based data
+exchanged over Bluetooth connections and Wi-Fi peer-to-peer connections. \\
+This approach represents the highest degree of control accessible to developers,
+as \textit{Apple} restricts direct access to hardware network interfaces,
+thereby preventing the implementation of custom link-layer protocols.
+Consequently, the \textit{Multipeer Connectivity} framework is adopted as a
+link-layer abstraction, providing the necessary substrate for peer discovery and
+data transmission. \\
+
+\paragraph*{\textbf{Architecture}}~\\
+The \textit{Multipeer Connectivity} framework exposes the following
+\textit{Swift} objects:  
+\begin{itemize}
+    \item \texttt{MCPeerID}: object that represents a peer in the network,
+    identified by a unique display name;
+    \item \texttt{MCSession}: session object that facilitates communication between
+    connected peers. This object maintains a set of \texttt{MCPeerID}
+    objects, representing the peers currently connected to the session,
+    sustaining up to eight concurrent peer-to-peer connections (as suggested by
+    the official documentation of the framework); 
+    \item \texttt{MCNearbyServiceAdvertiser}: advertiser object that tell nearby
+    peers that our device is willing to join session of a specified type. The
+    advertiser is responsible for handling incoming invitations received from
+    nearby peer's browsers; 
+    \item \texttt{MCNearbyServiceBrowser}: browser object that searches for
+    nearby peers that support sessions of a specified type, providing the
+    ability to invite those peers to join a \texttt{MCSession}.
+\end{itemize}
+In our application, we designed and implemented a \texttt{MultipeerManager}
+class, which is responsible for managing the interactions with the
+\textit{Multipeer Connectivity} objects, implementing the necessary
+\texttt{MCSessionDelegate}, \texttt{MCNearbyServiceAdvertiserDelegate}, and
+\texttt{MCNearbyServiceBrowserDelegate} protocols, providing a high-level
+interface to interact with the framework.\\
+
+\paragraph*{\textbf{Discovery and Session Phase}}~\\
+The framework operates in two main phases: the discovery phase and the session
+phase.\\ 
+
+The discovery phase requires two parties: the advertiser on the device that
+wants to join a session, and the browser on the device that is already part of a
+session and is looking for nearby peers to invite. \\
+
+Both advertiser and browser need to specify a \texttt{serviceType} to operate:
+in our application, the service type is set to "\texttt{plane-chat}". This
+allows devices to discover or be discovered only by peers that are providing our
+application's service, preventing interference with other applications that
+might be using the framework for different purposes. \\ 
+
+The discovery phase starts with a peer that, after instantiating a
+\texttt{MCNearbyServiceAdvertiser} object with the \texttt{serviceType} set to
+"\texttt{plane-chat}", starts advertising itself by invoking its
+\texttt{startAdvertisingPeer()} method. This advertisment makes the peer
+discoverable by nearby \texttt{MCNearbyServiceBrowser} instances, again created
+with the same \texttt{serviceType} "\texttt{plane-chat}". When a browser finds a
+nearby advertiser, it invites the peer to join its session by invoking the
+browser's \texttt{invitePeer()} method. The advertiser, upon receiving the
+invitation, can choose to accept or reject it: this decision is forwarded up to the
+application layer, which will trigger an asynchronous event that will be handled
+by the presentation layer of the application, in order to let the user decide
+which session to join. If the invitation is accepted, the advertiser joins the
+browser's session and vice versa (the advertiser indeed needs to provide its own
+\texttt{MCSession} object to the browser when accepting the invitation, creating
+it if neccessary), meaning that a peer-to-peer connection is established between
+the two devices, allowing them to exchange messages. \\  
+Although at the link layer we do not have any notion of group, the application
+layer is designed in such a way that each session contribute to only one group
+in the application. Consequently, every peer-to-peer link established by the
+framework serves as a transport medium for that specific group's traffic,
+ensuring that membership identity is maintained consistently across the
+multi-hop network. \\
+To exploit the capabilities of the framework, browsering operations are
+performed not only when a session is available: if a peer is not currently part
+of any session and found a nearby peer that is advertising itself, it will store 
+the peer's information in order to be able to invite it later when a session is
+available. \\
+All those operations are handled by the \texttt{MultipeerManager} class, which
+guarantees that each session does not exceed the maximum number of eight peers
+allowed by the framework, managing invitation and acceptance decisions by acting
+as delegate for both the advertiser and the browser. \\
+Once a device joins a session, the \texttt{MCSessionDelegate} protocol must
+implement methods to handle peer state changes and incoming messages.
+These methods serve as the primary interface for propagating link-layer events
+up to the network layer, allowing the system to update routing tables and
+process received payloads. \\ 
+Specifically, the \texttt{session(\_:peer:didChange:)} method provides
+notifications whenever a peer changes its state with respect to a session. The
+framework defines three possible states for a peer: 
+\begin{itemize}
+    \item \texttt{connecting}: the peer has accepted an invitation to join the
+    session and is in the process of establishing a connection with the inviting
+    peer;
+    \item \texttt{connected}: the peer has successfully established a connection
+    with the inviting peer and is now part of the session;
+    \item \texttt{disconnected}: the peer has left the session, either
+    voluntarily or due to a connection failure, and is no longer part of it.
+\end{itemize}
+Thanks to this method, the application is able to update the configuration of
+the network and the session accordingly to the changes in the session's
+topology. \\
+Regarding message exchange, the \texttt{session(\_:didReceive:fromPeer:)}
+method is invoked whenever a message is received from a peer. The received
+message is then forwarded to the network layer, which will determine whether it
+is a network control message to be processed locally, or if it is an application 
+data message that needs to be passed up to the application layer for further
+handling. \\
+
+\subsection{Network Layer: DSDV Protocol}
+The network layer acts as an abstraction over the \textit{Multipeer
+Connectivity} connections, where each participating device is modeled as a node
+and every peer-to-peer connection established via the framework represents a
+direct link between them. \\
+Since the \textit{Multipeer Connectivity} framework allows to establish only
+eight peer-to-peer connections per session, the application implements the DSDV
+protocol at the network layer to enable multi-hop communication between devices,
+allowing more users to join the same group and chat with each other. \\ 
+The need for a routing protocol arises from the fact that, in our MANET,
+not all nodes present a direct connection with each other, and thus
+messages may need to be forwarded through intermediate nodes to reach their
+destination. \\ 
+
+In our implementation, we chose to adopt the DSDV (Destination-Sequenced
+Distance-Vector) protocol, a proactive routing protocol, meaning that
+each node mantains information about routes to all other nodes in the network,
+independently of the route usage. This approach allows to minimize the latency
+of message delivery, as routes can be immediately used when a message needs to
+be sent, without the need to wait for a route discovery process to complete. \\
+Specifically, each node maintains a routing table that contains entries for all
+other nodes in the network, where each entry includes the destination node, the
+next-hop node to reach the destination, the number of hops to reach the
+destination and a sequence number that is used to determine the freshness of the
+route. As a distance-vector algorithm, each DSDV node maintains for every
+destination a set of distances provided by each of its neighbors, and
+selects the neighbor that offers the lowest distance as the next-hop for
+that destination. This algorithm is the classical \textit{Distributed
+Bellman-Ford} algorithm, which is well known to be vulnerable to the formation
+of both short-lived and long-lived loops: to mitigate this issue caused by nodes
+that choose their next-hops based on information which can possibly be stale
+(and therefore incorrect), the DSDV protocol uses sequence numbers to tag each
+route table entry, allowing nodes to quickly distinguish stale routes from the
+new ones. \\
+
+The DSDV protocol requires each node to advertise, to each of its current
+neighbors, its own routing table periodically or incrementally as soon as a
+significant topological changes are detected: those data broadcasted will contain
+table entries (where each entry is identified by a destination's address, the
+number of hops required to reach the destination, the sequence number of the
+information received regarding that destination, as originally stamped by the
+destination) and the sequence number of the node itself, with the address of
+the transmitting node in the header. \\
+Routes with more recent sequence numbers are always preferred as the basis for
+making forwarding decisions, while for paths with the same sequence number, they
+are compared based on their hop counts, with the smallest one being preferred.
+\\
+
+Sequence numbers are usually generated by the destination node itself, which
+increments its value upon detecting a signficant change in its local topology,
+such as a new neighbor. In our implementation, such an event is triggered by the
+\texttt{session(\_:peer:didChange:)} method of the \texttt{MCSessionDelegate}
+protocol whenever a peer's state transitions to \texttt{connected}. \\
+Not all the sequence numbers are generateed by the destination node: indeed,
+when a node observes a broken link to a destination, it will generate a new
+sequence number for that destination and then advertise it 
+to its neighbors: this broken link is identified by infinite distance to the
+destination (i.e. a hop count of -1 in our implementation) and is again detected
+by the \texttt{session(\_:peer:didChange:)} method when a peer changes its state
+to \texttt{disconnected}. \\
+The DSDV protocol is designed to distinguish sequence numbers generated by the
+destination node itself, which are even, from sequence numbers generated by
+other nodes, which are odd: this allows to avoid the possibility of entries
+generated by different nodes to spread information about the same destination
+with the same sequence number, which would make it impossible to determine which
+one is more recent. \\ 
+In order to reestablish a route after detecting a broken link, the destination
+node of the lost connection increments its own sequence number and advertises
+the update to all its neighbors. This enforces a routing table update across the
+network, eventually restoring connectivity to the node that discovered the
+breakage through an alternative path.  \\
+
+On the other hand, the proactive nature of the protocol introduces overhead in
+terms of control messages, especially in dynamic networks such as ad-hoc mobile
+networks, where topology can change frequently due to node mobility and
+connection failures. To mitigate this, the protocols allows for incremental
+updates instead of constant full dumps. While a full dump involves transmitting
+the entire routing table, incremental updates only include entries that have
+changed since the last update, significantly reducing the amount of information
+carried in each packet. While full dumps typically require multiple NPDUs
+(\textit{Network Protocol Data Unit}), using \textit{Multipeer Connectivity}
+messages as the transport for DSDV control messages -which does not have a fixed
+maximum payload size- allows for both full dumps and incremental updates to be
+sent in a single message. Nonetheless, incremental updates remains preferred, as
+they reduce the computational overhead of creating and processing full dumps
+while minimizing bandwidth consumption. \\
+
+The DSDV protocol is implemented in the \texttt{DSDVManager} class, which is
+responsible for maintaining the routing table upon receiving updates from the
+\textit{Multipeer Connectivity} framework and for making routing decisions when
+the application layer needs to send an application message to a destination. \\
+As mentioned above, the \texttt{DSDVManager} handle the messages received from
+the link layer, distinguishing between: \\
+\begin{itemize}
+    \item \textit{Network Control Messages}: these messages are used by the DSDV
+    protocol to maintain and update routing information across the network. They
+    are processed locally by the \texttt{DSDVManager} class, which updates the
+    routing table accordingly to the information carried in the message and, if
+    necessary, triggers the generation of new control messages to be sent to
+    neighbors to propagate the update across the network;
+    \item \textit{Application Data Messages}: these messages are used by the
+    application layer to exchange chat messages between users. When the
+    \texttt{DSDVManager} receives an application data message, it inspect the
+    destination: if the destination is the local node, the message is 
+    forwarded up to the application layer; otherwise it is forwarded to the
+    next-hop node accordingly to the routing table. This mechanism allows
+    messages to reach ther final destination through multiple hops, once again
+    relying on the \textit{Multipeer Connectivity} framework as the underlying
+    transport for packet forwarding. 
+\end{itemize} 
+
+Finally, the \texttt{DSDVManager} exposes a high-level interface to the
+application layer for broadcasting data messages to all nodes in the group. It
+also provides a method for requesting specific control messages to handle group
+management operations, effectively abstracting the underlying protocols and
+hiding their complexity from the application layer. \\
+
+\subsection{Application Layer}
+The application layer, in our protocol stack, provides the protocol that is
+responsible for managing the transmission of application data and handlign other
+operations toward under protocol layers. \\ 
+Our application layer is implemented in the \texttt{ChatManager} class, which is
+also responsible for the management of the business logic of the application.\\
+
+Specifically, once the application layer receives a request from the user to
+create a group, it will create a specific command message to be sent to the
+network layer via the \texttt{requestControl()} method of the
+\texttt{DSDVManager} class, which will trigger the creation of a new session at
+the link layer. Similarly, this flow is used when a user wants to join or leave
+a group, with a different command message for the network layer that will
+trigger at the link layer to accept or reject an invitation to join a session or 
+the session termination, respectively. \\ 
+
+Regarding message exchange, when a user sends a message in the group chat, the
+application layer creates an application data message and it is broadcasted to
+all nodes in the group by invoking the \texttt{broadcastMessage()} method of the
+\texttt{DSDVManager} class, which will handle the message forwarding to all
+nodes in the group, relying on the routing decisions made by the DSDV protocol, 
+via the \textit{Multipeer Connectivity} framework as the underlying transport.\\
+The application layer also handles the reception of messages from the network
+layer, triggering an appropriate event to update the presentation layer of the
+application and display the received message in the group chat interface. \\
+
+The application layer is designed to be simple and lightweight, following a
+"best-effort" delivery model. This means that the application does not implement
+any acknowledgement (ACK) mechanism or retransmission logic, which implies that
+the delivery of packets to all nodes in the group is not strictly guaranteed.
 
 \section{Experimental Setup and Results}
 \label{sec:ExperimentalSetupAndResults}
@@ -121,12 +449,6 @@ and improvements for the \textit{Plane Chat} application.
 % \label{tab1}
 % \end{center}
 % \end{table}
-
-% \begin{figure}[htbp]
-% \centerline{\includegraphics{fig1.png}}
-% \caption{Example of a figure caption.}
-% \label{fig}
-% \end{figure}
 
 \section*{References}
 % Please number citations consecutively within brackets \cite{b1}. 
