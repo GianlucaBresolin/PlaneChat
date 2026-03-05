@@ -14,7 +14,6 @@ extension MultipeerManager: MCSessionDelegate {
             removeNeighbor(neighbor: peerID)
         case .notConnected:
             networkDelegate.notifyBrokenLink(brokenNode: peerID.displayName)
-            removeMember(member: peerID)
             addNeighbor(neighbor: peerID)
             // try to invite it back
             invitePeerToSession(peer: peerID)
