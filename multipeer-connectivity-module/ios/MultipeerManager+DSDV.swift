@@ -18,34 +18,34 @@ extension MultipeerManager : DSDVManagerLinkDelegate {
     }
     
     func handleInvitationResponse(sessionName: String, accepted: Bool) {
-        guard let invitation = getInvitationHandler(sessionName: sessionName) else {
+        guard let invitationHandler = getInvitationHandler(sessionName: sessionName) else {
             return
         }
         if accepted {
             // accept to join session
             guard let session = createSession(sessionName: sessionName) else {
                 print("Link Error: impossible to accept invitation, an error occur while creating session.")
-                removeInvitation(sessionName: sessionName)
+                removePendingInvitation(sessionName: sessionName)
                 return
             }
-            invitation(accepted, session)
-            clearInvitations()
+            invitationHandler(accepted, session)
+            clearPendingInvitations()
             // propagate invitations to our neighbors
             inviteNeighborsToSession()
         } else {
             // reject to join session
-            invitation(accepted, nil)
-            removeInvitation(sessionName: sessionName)
+            invitationHandler(accepted, nil)
+            removePendingInvitation(sessionName: sessionName)
         }
     }
     
     func broadcastPacket(
         data: Data
     ) {
-        guard let peers = getSessionPeers() else {
-            return
-        }
-        guard !peers.isEmpty else {
+        guard
+            let peers = getSessionPeers(),
+            !peers.isEmpty
+        else {
             return
         }
         sendData(peers: peers, data: data)

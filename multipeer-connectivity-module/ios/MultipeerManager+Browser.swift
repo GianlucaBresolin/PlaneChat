@@ -10,19 +10,18 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
             addNeighbor(neighbor: peerID)
             return
         }
-        // YES: is it already in our session?
-        guard let sessionPeers = getSessionPeers(), !sessionPeers.contains(peerID) else {
+        // YES: is it already in our session or we do not have space?
+        guard
+            let sessionPeers = getSessionPeers(),
+            !sessionPeers.contains(peerID),
+            sessionPeers.count < self.MCSessionSize
+        else {
             // YES: do not invite it.
             return
         }
-        // NO: do we have space?
-        guard sessionPeers.count < self.MCSessionSize else {
-            // NO: do not invite it.
-            return
-        }
-        // YES: invite it.
+        // NO: invite it.
         invitePeerToSession(peer: peerID)
-}
+    }
 
     // call when a peer is lost (we were not connected)
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
