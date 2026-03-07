@@ -13,14 +13,10 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate {
             return
         }
         // are we in a session?
-        guard let sessionAvailable = sessionAvailable() else {
-            return
-        }
-        if sessionAvailable {
+        if sessionAvailable() {
             // YES: append invitation only if it is our group and we have space
             guard
-                let checkSessionName = checkSessionName(sessionName: sessionName),
-                checkSessionName,
+                checkSessionName(sessionName: sessionName),
                 let sessionPeers = getSessionPeers(),
                 sessionPeers.count < self.MCSessionSize,
                 !sessionPeers.contains(peerID)

@@ -57,32 +57,23 @@ class MultipeerManager: NSObject {
     
     // Neighbors
     func addNeighbor(neighbor: MCPeerID) -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                !self.Neighbors.contains(neighbor)
-            else {
+        isolationQueue.async {
+            guard !self.Neighbors.contains(neighbor) else {
                 return
             }
             self.Neighbors.append(neighbor)
         }
     }
     
-    func getNeighbors() -> [MCPeerID]? {
-        isolationQueue.sync { [weak self] in
-            guard let self = self else {
-                return nil
-            }
+    func getNeighbors() -> [MCPeerID] {
+        return isolationQueue.sync {
             return self.Neighbors
         }
     }
     
     func removeNeighbor(neighbor: MCPeerID) -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                let index = self.Neighbors.firstIndex(of: neighbor)
-            else {
+        isolationQueue.async {
+            guard let index = self.Neighbors.firstIndex(of: neighbor) else {
                 return
             }
             self.Neighbors.remove(at: index)
@@ -91,11 +82,8 @@ class MultipeerManager: NSObject {
     
     // Pending Invitations
     func addPendingInvitation(sessionName: String, invitationHandler: @escaping ((Bool, MCSession?) -> Void)) -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                self.PendingInvitations[sessionName] == nil
-            else {
+        isolationQueue.async {
+            guard self.PendingInvitations[sessionName] == nil else {
                 // we already have an invitation for that session
                 return
             }
@@ -104,11 +92,8 @@ class MultipeerManager: NSObject {
     }
     
     func getInvitationHandler(sessionName: String) -> ((Bool, MCSession?) -> Void)? {
-        isolationQueue.sync { [weak self] in
-            guard
-                let self = self,
-                let invitation = self.PendingInvitations[sessionName]
-            else {
+        return isolationQueue.sync {
+            guard let invitation = self.PendingInvitations[sessionName] else {
                 print("Link Error: no invitation available for this session name.")
                 return nil
             }
@@ -117,30 +102,21 @@ class MultipeerManager: NSObject {
     }
     
     func removePendingInvitation(sessionName: String) -> Void {
-        isolationQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
+        isolationQueue.async {
             self.PendingInvitations.removeValue(forKey: sessionName)
         }
     }
     
     func clearPendingInvitations() -> Void {
-        isolationQueue.async { [weak self] in
-            guard let self = self else {
-                return
-            }
+        isolationQueue.async {
             self.PendingInvitations.removeAll()
         }
     }
         
     // Session
     func createSession(sessionName: String) -> MCSession? {
-        isolationQueue.sync { [weak self] in
-            guard
-                let self = self,
-                self.Session == nil
-            else {
+        return isolationQueue.sync {
+            guard self.Session == nil else {
                 print("Link Error: A session already exists.")
                 return nil
             }
@@ -155,39 +131,27 @@ class MultipeerManager: NSObject {
     }
     
     func getSession() -> MCSession? {
-        isolationQueue.sync { [weak self] in
-            guard let self = self else {
-                return nil
-            }
+        return isolationQueue.sync {
             return self.Session
         }
     }
     
-    func sessionAvailable() -> Bool? {
-        isolationQueue.sync { [weak self] in
-            guard let self = self else {
-                return nil
-            }
+    func sessionAvailable() -> Bool {
+        return isolationQueue.sync {
             return self.Session != nil
         }
     }
     
-    func checkSessionName(sessionName: String) -> Bool? {
-        isolationQueue.sync { [weak self] in
-            guard let self = self else {
-                return nil
-            }
+    func checkSessionName(sessionName: String) -> Bool {
+        return isolationQueue.sync {
             return sessionName == self.SessionName
         }
     }
     
     func sendData(peers: [MCPeerID], data: Data) -> Void {
-        isolationQueue.async { [weak self] in
+        isolationQueue.async {
             do {
-                guard
-                    let self = self,
-                    let session = self.Session
-                else {
+                guard let session = self.Session else {
                     print("Link Error: impossible to send data, no session available.")
                     return
                 }
@@ -203,11 +167,8 @@ class MultipeerManager: NSObject {
     }
     
     func disconnectSession() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                let session = self.Session
-            else {
+        isolationQueue.async {
+            guard let session = self.Session else {
                 print("Link Error: no session to disconnect.")
                 return
             }
@@ -223,11 +184,8 @@ class MultipeerManager: NSObject {
     }
     
     func getSessionPeers() -> [MCPeerID]? {
-        isolationQueue.sync { [weak self] in
-            guard
-                let self = self,
-                let session = self.Session
-            else {
+        return isolationQueue.sync {
+            guard let session = self.Session else {
                 print("Link Error: impossible to retrieve peers, no available sesion.")
                 return nil
             }
@@ -236,11 +194,8 @@ class MultipeerManager: NSObject {
     }
     
     func getMCIDfrom(displayName: String) -> MCPeerID? {
-        isolationQueue.sync { [weak self] in
-            guard
-                let self = self,
-                let session = self.Session
-            else {
+        return isolationQueue.sync {
+            guard let session = self.Session else {
                 print("Link Errror: unable to retrieve peerID, no available session.")
                 return nil
             }
@@ -254,11 +209,8 @@ class MultipeerManager: NSObject {
     
     // Browser
     private func createBrowser() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                self.Browser == nil
-            else {
+        isolationQueue.async {
+            guard self.Browser == nil else {
                 print("Link Error: impossible to create browser, a browser already exists.")
                 return
             }
@@ -272,11 +224,8 @@ class MultipeerManager: NSObject {
     }
     
     func startBrowsing() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                let browser = self.Browser
-            else {
+        isolationQueue.async {
+            guard let browser = self.Browser else {
                 print("Link Error: impossible to start browser, no available browser.")
                 return
             }
@@ -285,11 +234,8 @@ class MultipeerManager: NSObject {
     }
     
     func stopBrowsing() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                let browser = self.Browser
-            else {
+        isolationQueue.async {
+            guard let browser = self.Browser else {
                 print("Link Error: impossible to stop browser, no available browser")
                 return
             }
@@ -298,9 +244,8 @@ class MultipeerManager: NSObject {
     }
     
     func invitePeerToSession(peer: MCPeerID) -> Void {
-        isolationQueue.async { [weak self] in
+        isolationQueue.async {
             guard
-                let self = self,
                 let browser = self.Browser,
                 let session = self.Session,
                 let sessionName = self.SessionName,
@@ -323,23 +268,15 @@ class MultipeerManager: NSObject {
     }
     
     func inviteNeighborsToSession() -> Void {
-        guard let neighbors = getNeighbors() else {
-            print("Link Error: failed to retrieve neighbors, impossible to invite them to the session.")
-            return
-        }
-        for neighbor in neighbors {
+        for neighbor in getNeighbors() {
             invitePeerToSession(peer: neighbor)
         }
-        return
     }
     
     // Advertiser
     private func createAdvertiser() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                self.Advertiser == nil
-            else {
+        isolationQueue.async {
+            guard self.Advertiser == nil else {
                 print("Link Error: impossible to create advertiser, an advertiser already exists.")
                 return
             }
@@ -354,11 +291,8 @@ class MultipeerManager: NSObject {
     }
     
     private func startAdvertising() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                let advertiser = self.Advertiser
-            else {
+        isolationQueue.async {
+            guard let advertiser = self.Advertiser else {
                 print("Link Error: impossible to start advertising, no available advertiser.")
                 return
             }
@@ -367,11 +301,8 @@ class MultipeerManager: NSObject {
     }
     
     private func stopAdvertising() -> Void {
-        isolationQueue.async { [weak self] in
-            guard
-                let self = self,
-                let advertiser = self.Advertiser
-            else {
+        isolationQueue.async {
+            guard let advertiser = self.Advertiser else {
                 print("Link Error: impossible to stop advertising, no available advertiser.")
                 return
             }

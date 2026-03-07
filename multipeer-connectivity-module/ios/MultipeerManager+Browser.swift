@@ -5,10 +5,7 @@ extension MultipeerManager: MCNearbyServiceBrowserDelegate {
     // call when found a peer
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         // are we in a session?
-        guard
-            let sessionAvailable = sessionAvailable(),
-            sessionAvailable
-        else {
+        guard sessionAvailable() else {
             // NO: save to our neighbor peers (if not already present).
             addNeighbor(neighbor: peerID)
             return
