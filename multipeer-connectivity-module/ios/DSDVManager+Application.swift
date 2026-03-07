@@ -1,18 +1,17 @@
 import Foundation
 
 extension DSDVManager: ChatManagerNetworkDelegate {
-    func broadcast(data: Data) {
+    func broadcastMessage(data: Data) {
         guard let linkDelegate = self.LinkDelegate else {
             print("Network Error: impossible to broadcast data, no link delegate available.")
             return
         }
-        let packetHeader = "1|"
-        guard let packetHeaderPayload = packetHeader.data(using: .utf8) else {
-            print("Network Error: fail to encode packet header.")
-            return
+        for member in getMembers() {
+            forwardMessage(
+                to: member,
+                applicationData: data
+            )
         }
-        let packetPayload = packetHeaderPayload + data
-        linkDelegate.broadcastPacket(data: packetPayload)
     }
     
     func requestControl(

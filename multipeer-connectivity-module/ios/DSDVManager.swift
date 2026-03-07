@@ -5,175 +5,137 @@ class DSDVManager {
     private let MyNodeID : NodeID
     private var MySequenceNumber : SequenceNumber
     private var Table : DSDVTable
-    private var Members : [NodeID]
     
-    weak var delegate : DSDVManagerDelegate?
+    weak var LinkDelegate : DSDVManagerLinkDelegate?
+    weak var ApplicationDelegate : DSDVManagerApplicationDelegate?
     
-    init(nodeID: NodeID) {
-        self.MyNodeID = nodeID
-        self.MySequenceNumber = SequenceNumber(value: 0, destination: self.MyNodeID)
-        self.Table = DSDVTable()
-        self.Members = [NodeID]()
-    }
+    let IsolationQueue: DispatchQueue
     
-    func notifyNewLink(
-        newNode: NodeID
+    init(
+        nodeID: NodeID
     ) {
-        // update our table
-        guard self.Table.updateLine(
-            to: newNode,
-            next: newNode,
-            hops: 1,
-            sequenceNumber: self.MySequenceNumber.increment()
-        ) else {
-            // fail update
-            return
-        }
-        // broadcast update to other nodes
-        broadcastUpdate(
-            destination: self.MyNodeID,
-            hops: 1,
-            sequenceNumber: self.MySequenceNumber
-        )
-        if !self.Members.contains(newNode) {
-            self.Members.append(newNode)
+        MyNodeID = nodeID
+        MySequenceNumber = SequenceNumber(value: 0, destination: self.MyNodeID)
+        Table = DSDVTable()
+        IsolationQueue = DispatchQueue(label: "DSDVManagerIsolationQueue")
+    }
+    
+    func handleReset() -> Void {
+        self.IsolationQueue.async {
+            self.Table.reset()
+            self.MySequenceNumber.reset()
         }
     }
     
-    func notifyBrokenLink(
-        brokenNode: NodeID
-    ) {
-        // obtain brokenNode sequence number
-        guard let destinationSequenceNumber = self.Table.getSequenceNumber(of: brokenNode) else {
-            // no brokenNode in table: exit
-            return
-        }
-        
-        // update our table
-        guard self.Table.updateLine(
-            to: brokenNode,
-            next: nil,
-            hops: -1,
-            sequenceNumber: destinationSequenceNumber.generateError()
-        ) else {
-            // fail update
-            return
-        }
-        // broadcast update to other nodes
-        broadcastUpdate(
-            destination: brokenNode,
-            hops: -1,
-            sequenceNumber: destinationSequenceNumber
-        )
-        if let index = self.Members.firstIndex(of: brokenNode) {
-            self.Members.remove(at: index)
+    func getMyNodeID() -> NodeID {
+        return IsolationQueue.sync {
+            return self.MyNodeID
         }
     }
     
-    func reset() {
-        self.Members = []
-        self.Table.reset()
-        self.MySequenceNumber.reset()
+    // Table
+    func updateLine(
+        destination: NodeID,
+        next: NodeID?,
+        hops: Int,
+        sequenceNumber: SequenceNumber
+    ) -> Bool {
+        return IsolationQueue.sync {
+            return
+                self.Table.updateLine(
+                    to: destination,
+                    next: next,
+                    hops: hops,
+                    sequenceNumber: sequenceNumber
+                )
+        }
     }
     
+    func getSequenceNumber(of: NodeID) -> SequenceNumber? {
+        return IsolationQueue.sync {
+            return self.Table.getSequenceNumber(of: of)
+        }
+    }
+    
+    func getNextHop(for destination: NodeID) -> NodeID? {
+        return IsolationQueue.sync {
+            return self.Table.getNextHop(for: destination)
+        }
+    }
+    
+    func getMembers() -> [NodeID] {
+        return IsolationQueue.sync {
+            return self.Table.getMembers()
+        }
+    }
+    
+    // Sequence Number
+    func incrementMySequenceNumber() -> SequenceNumber {
+        return IsolationQueue.sync {
+            return self.MySequenceNumber.increment()
+        }
+    }
+    
+    // Update
     func handleUpdate(
         from: NodeID,
         destination: NodeID,
         hops: Int,
         sequenceNumber: SequenceNumber
     ) {
-        guard destination != self.MyNodeID else {
-            // discard updates regarding us as destination
+        guard
+            updateLine(
+                destination: destination,
+                next: from,
+                hops: hops,
+                sequenceNumber: sequenceNumber
+            )
+        else {
+            // no significant update
             return
         }
-        // update our table
-        guard self.Table.updateLine(
-            to: destination,
-            next: from,
-            hops: hops,
-            sequenceNumber: sequenceNumber
-        ) else {
-            // fail update
-            return
-        }
-        // propagate our updates via broadcast
+        // broadcast update
         var updatedHops = hops
         if updatedHops != -1 {
             // update only if different from unreachable hops (-1)
             updatedHops += 1
         }
-        broadcastUpdate(
-            destination: destination,
-            hops: updatedHops,
-            sequenceNumber: sequenceNumber
-        )
-        if updatedHops == -1 {
-            if let index = self.Members.firstIndex(of: destination) {
-                self.Members.remove(at: index)
-            }
-        } else {
-            if !self.Members.contains(destination) {
-                self.Members.append(destination)
-            }
-        }
-    }
-    
-    func broadcastUpdate(
-        destination: NodeID,
-        hops: Int,
-        sequenceNumber: SequenceNumber
-    ) {
-        guard let delegate = self.delegate else {
-            print("Error: no delegate available")
+        let packetUpdate = "0|\(self.MyNodeID)|\(destination)|\(updatedHops)|\(sequenceNumber.value)"
+        guard let packetUpdatePayload = packetUpdate.data(using: .utf8) else {
+            print("Network Error: fail to encode update packet.")
             return
         }
-        
-        delegate.broadcastUpdate(
-            destination: destination,
-            hops: hops,
-            sequenceNumber: sequenceNumber.value
-        )
-    }
-    
-    func broadcastMessage(
-        data: Data
-    ) {
-        guard let delegate = self.delegate else {
-            print("Error: no delegate available")
+        guard let linkDelegate = self.LinkDelegate else {
+            print("Network Error: impossible to broadcast update, no link delegate available.")
             return
         }
-        // broadcast message to all the members
-        for member in self.Members {
-            // retrieve next hop for member
-            guard let nextHop = self.Table.getNextHop(for: member) else {
-                // fail nextHop retrieve
-                continue
-            }
-            delegate.unicastApplicationPacket(
-                nextHop: nextHop,
-                destination: member,
-                applicationData: data
-            )
-        }
+        linkDelegate.broadcastPacket(data: packetUpdatePayload)
     }
+
     
+    // Forward
     func forwardMessage(
         to destination: NodeID,
-        applicationData data: Data
+        applicationData: Data
     ) {
-        guard let delegate = self.delegate else {
-            print("Error: no delegate available")
-            return
+        IsolationQueue.async {
+            guard let linkDelegate = self.LinkDelegate else {
+                print("Network Error: impossible to forward message, no link delegate available")
+                return
+            }
+            guard let nextHop = self.Table.getNextHop(for: destination) else {
+                print("Network Error: impossible to forward message, impossible to retrieve next hop.")
+                return
+            }
+            let networkPacketHeader = "1|\(destination)|"
+            guard let networkPacketHeaderPayload = networkPacketHeader.data(using: .utf8) else {
+                print("Network Error: impossible to forward message, an error occur during network packet header encoding.")
+                return
+            }
+            linkDelegate.unicastPacket(
+                destination: nextHop,
+                data: networkPacketHeaderPayload + applicationData
+            )
         }
-        // retrieve nextHop
-        guard let nextHop = self.Table.getNextHop(for: destination) else {
-            // fail nextHop retrieve
-            return
-        }
-        delegate.unicastApplicationPacket(
-            nextHop: nextHop,
-            destination: destination,
-            applicationData: data
-        )
     }
 }
