@@ -32,7 +32,6 @@ extension MultipeerManager: MCSessionDelegate {
             return
         }
         networkDelegate.handleMessage(
-            from: peerID.displayName,
             data: data
         )
     }

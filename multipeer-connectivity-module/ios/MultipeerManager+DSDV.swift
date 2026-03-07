@@ -10,7 +10,10 @@ extension MultipeerManager : DSDVManagerLinkDelegate {
     }
     
     func quitSession(sessionName: String) {
-        guard checkSessionName(sessionName: sessionName) else {
+        guard
+            let checkSessionName = checkSessionName(sessionName: sessionName),
+            checkSessionName
+        else {
             print("Link Error: impossible to leave session. Different session name provided.")
             return
         }
