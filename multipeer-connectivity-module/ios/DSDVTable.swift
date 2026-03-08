@@ -44,12 +44,15 @@ class DSDVTable {
             nextHop: updatedNextHop,
             sequenceNumber: max(currentLine.sequenceNumber, sequenceNumber)
         )
-        print(self.table)
         return success
     }
     
-    func reset() {
-        self.table.removeAll()
+    func getMembers() -> [NodeID] {
+        var members: [NodeID] = []
+        for (key, _) in self.table {
+            members.append(key)
+        }
+        return members
     }
     
     func getSequenceNumber(of destination: NodeID) -> SequenceNumber? {
@@ -64,5 +67,9 @@ class DSDVTable {
             return nil
         }
         return line.nextHop
+    }
+    
+    func reset() {
+        self.table.removeAll()
     }
 }
