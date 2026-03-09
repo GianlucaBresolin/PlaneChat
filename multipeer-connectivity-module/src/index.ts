@@ -14,8 +14,10 @@ export function joinGroup(
     return MultipeerConnectivityModule.joinGroup(groupName);
 }
 
-export function leaveGroup(): void {
-    return MultipeerConnectivityModule.leaveGroup();
+export function leaveGroup(
+    groupName: string
+): void {
+    return MultipeerConnectivityModule.leaveGroup(groupName);
 }
 
 export function sendMessage(
@@ -29,7 +31,7 @@ export function sendMessage(
 export function addFoundGroupListener(
     listener: (event: FoundGroupEvent) => void
 ): EventSubscription {
-    return MultipeerConnectivityModule.addListener("foundSession", listener);
+    return MultipeerConnectivityModule.addListener("foundGroup", listener);
 }
 
 export function addReceivedMessageListener(
