@@ -21,7 +21,7 @@ export default function ChatHeader({groupName}: {groupName: string}) {
                         title: "",
                         onPress: () => {
                             console.log("Leaving chat");
-                            leaveGroup();
+                            leaveGroup(groupName);
                             router.replace("/");
                         },
                         iconName: "log-out", 
