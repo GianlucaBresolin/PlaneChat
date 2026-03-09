@@ -10,7 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.PlaneChat"
+      "bundleIdentifier": "com.gianluca.planechat",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "PlaneChat utilizza la rete locale per connettersi ai dispositivi vicini senza internet.",
+        "NSBonjourServices": [
+          "_plane-chat._tcp",
+          "_plane-chat._udp"
+        ]
+      }
     },
     "plugins": [
       "expo-router",
