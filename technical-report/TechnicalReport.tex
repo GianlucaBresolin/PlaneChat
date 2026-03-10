@@ -9,6 +9,7 @@
 \usepackage{xcolor}
 \usepackage{float}
 \usepackage{booktabs}
+\usepackage{url}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -515,32 +516,49 @@ environments.
 
 \section{Conclusions}
 \label{sec:Conclusions}
+In this report, we presented \textit{Plane Chat}, an iOS application designed to
+facilitate group communication in infrastructure-less environments, such as
+during flights. By leveraging the \textit{Multipeer Connectivity} framework as a
+link-layer substrate and implementing the \textit{Destination-Sequenced
+Distance-Vector} (DSDV) routing protocol, we successfully overcame the inherent
+limitations of peer-to-peer range and session capacity.  \\
 
-% \begin{table}[htbp]
-% \caption{Table Type Styles}
-% \begin{center}
-% \begin{tabular}{|c|c|c|c|}
-% \hline
-% \textbf{Table}&\multicolumn{3}{|c|}{\textbf{Table Column Head}} \\
-% \cline{2-4} 
-% \textbf{Head} & \textbf{\textit{Table column subhead}}& \textbf{\textit{Subhead}}& \textbf{\textit{Subhead}} \\
-% \hline
-% copy& More table copy$^{\mathrm{a}}$& &  \\
-% \hline
-% \multicolumn{4}{l}{$^{\mathrm{a}}$Sample of a Table footnote.}
-% \end{tabular}
-% \label{tab1}
-% \end{center}
-% \end{table}
+The experimental evaluation demonstrated that the system effectively maintains a
+mobile ad-hoc network (MANET), enabling successful multi-hop communication. Our
+results confirmed that the DSDV protocol correctly manages routing tables and
+path discovery, allowing devices to communicate even when separated by distances
+exceeding their direct radio range. This proves the viability of using proactive
+routing protocols to extend the capabilities of standard mobile frameworks for
+specialized scenarios. \\
 
-\section*{References}
-% Please number citations consecutively within brackets \cite{b1}. 
+Possible future improvements to the application may focus on the network layer,
+where the DSDV protocol can be improved by introducing dynamic timers to allow
+the network to establish stable routes before broadcasting updates, thereby
+reducing the frequency of control message; such timers should ideally adjust
+dynamically based on recently observed network behavior. \\
+Additionally, the efficiency of the protocol can be increased by waiting for a
+threshold of updates before propagating them to neighbors, minimizing overhead
+in dense or highly dynamic environments. 
+Furthermore, the routing metric can be evolved beyond simple hop counts to
+include other properties in the path evaluation, such as signal   
+strength, error ratios, or round-trip time (RTT), enabling more informed routing
+decisions. \\
+At the application layer, future versions of the application can enhance the
+reliability of message delivery by implementing acknowledgment (ACK) mechanisms
+and retransmission logic.\\
 
-% \begin{thebibliography}{00}
-% \bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-% \bibitem{b8} D. P. Kingma and M. Welling, ``Auto-encoding variational Bayes,'' 2013, arXiv:1312.6114. [Online]. Available: https://arxiv.org/abs/1312.6114
-% \bibitem{b9} S. Liu, ``Wi-Fi Energy Detection Testbed (12MTC),'' 2023, gitHub repository. [Online]. Available: https://github.com/liustone99/Wi-Fi-Energy-Detection-Testbed-12MTC
-% \bibitem{b10} ``Treatment episode data set: discharges (TEDS-D): concatenated, 2006 to 2009.'' U.S. Department of Health and Human Services, Substance Abuse and Mental Health Services Administration, Office of Applied Studies, August, 2013, DOI:10.3886/ICPSR30122.v2
-% \end{thebibliography}
+In conclusion, \textit{Plane Chat} serves as a proof of concept for enabling 
+ad-hoc group communication in constrained environments among mobile devices,
+allowing us to explore the design and implementation challenges of MANETs in a
+real-scenario application. \\
+Ultimately, the source code of the application is publicly available at
+\url{https://github.com/GianlucaBresolin/PlaneChat}. \\  
+
+
+\begin{thebibliography}{00}
+\bibitem{b1} C. E. Perkins and P. Bhagwat, ``Highly dynamic Destination-Sequenced Distance-Vector routing (DSDV) for mobile computers,'' in \textit{Proceedings of the conference on Communications architectures, protocols and applications (SIGCOMM '94)}, 1994, pp. 234--244.
+\bibitem{b2} Apple Inc., ``MultipeerConnectivity,'' Apple Developer Documentation. [Online]. Available: \url{https://developer.apple.com/documentation/multipeerconnectivity}
+\bibitem{b3} G. Bresolin, ``PlaneChat,'' GitHub repository. [Online]. Available: \url{https://github.com/GianlucaBresolin/PlaneChat}
+\end{thebibliography}
 
 \end{document}
