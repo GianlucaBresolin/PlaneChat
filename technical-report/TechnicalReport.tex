@@ -29,7 +29,25 @@ gianbreso02@gmail.com}
 \maketitle
 
 \begin{abstract}
-Plane Chat abstract.
+This report presents the design and implementation of \textit{Plane Chat}, a
+mobile \textit{iOS} application developed to facilitate group communication in
+environments lacking pre-existing network infrastructure, such as during
+flights, by creating a mobile ad-hoc network (MANET). \\
+While Apple's \textit{Multipeer Connectivity} \cite {b2} framework 
+provides a robust substrate for peer-to-peer communication, it is limited by a
+small maximum number of concurrent connections and a lack of multi-hop
+capabilities. To overcome these constraints, we implemented the
+\textit{Destination-Sequenced Distance-Vector} (DSDV) routing protocol \cite{b1}
+at the network layer, enabling the formation of a mobile ad-hoc network (MANET)
+that supports scalable, multi-hop message delivery. Sitting above the network
+layer, an application layer protocol manges group and message management,
+following a "best-effort" delivery model. The application UI is
+devoloped using \textit{React Native}, while the underlying protocol stack is
+implemented in \textit{Swift}. \\
+Experimental results obtained using multiple \textit{iOS} devices in a linear
+topology in open space demonstrate the system's ability to maintain end-to-end
+connectivity and successfully route messages through intermediate nodes, even
+when the source and destination are beyond their direct communication range. 
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -39,7 +57,7 @@ Wireless Ad-Hoc Networks, Multipeer Connectivity, DSDV Protocol, iOS
 \section{Introduction}
 Wireless networks have become an integral part of our daily lives, enabling
 communication and connectivity in various environments. Those networks have
-gain a significant importance over the years, especially due to the widespread
+gained a significant importance over the years, especially due to the widespread
 adoption of mobile devices, with applications that rely on wireless
 communication to provide services and functionality. \\
 
@@ -49,7 +67,7 @@ are deployed. Those challenges require the design and implementation of
 specialized protocols and technologies to ensure network operation and
 performance. \\
 Specifically, \textit{ad-hoc} wireless networks do not require any
-pre-existing infrastructure and allow the construction of termporary networks
+pre-existing infrastructure and allow the construction of temporary networks
 with no wires and no administrative intervention required. Ad-hoc networks
 differ significantly from existing wired networks: the lack of physical
 connections between devices indeed allows for greater mobility and flexibility,
@@ -68,7 +86,7 @@ application enabling users to create groups and chat with each other during
 flights. Given the inherent constraints of such environments, the app is
 designed to work in a situation where devices are in close proximity without
 relying on pre-existing infrastructure, such as Wi-Fi access points or cellular 
-networks. Therefore, the app facilitate group creation and message exchange by
+networks. Therefore, the app facilitates group creation and message exchange by
 instantiating peer-to-peer connections via the \textit{Multipeer Connectivity}
 framework provided by \textit{Apple}, thereby creating an ad-hoc network. \\
 
@@ -96,7 +114,7 @@ and improvements for the \textit{Plane Chat} application.
 \textit{Plane Chat} is an \textit{iOS} mobile application designed to facilitate
 ad-hoc group communication during flights, without relying on pre-existing
 infrastructure. The application is specifically engineered to operate in
-"Ariplane Mode", where cellular and Wi-Fi services are restricted, leveraging
+"Airplane Mode", where cellular and Wi-Fi services are restricted, leveraging
 Bluetooth and peer-to-peer Wi-Fi connections as transport for data exchange
 between devices. \\ 
 
@@ -106,38 +124,38 @@ illustrated in Figure \ref{fig:initial_screen}. \\
 
 \begin{figure}[H]
 \centerline{\includegraphics[width=0.3\textwidth]{assets/landing-page.png}}
-\caption{Initial user interface of \textit{PlaneChat}.}
+\caption{Initial User Interface of \textit{PlaneChat}.}
 \label{fig:initial_screen}
 \end{figure}
 
 To create a group, the user must provide a valid group name, serving as an
-identigier for the group to other users, and a valid username that will be
+identifier for the group to other users, and a valid username that will be
 associated with each of his/her messages. Both fields must be not empty to allow
-the user to proceeed with the group creation, otherwise an allert with an
+the user to proceeed with the group creation, otherwise an alert with an
 appropriate error message will be displayed, preventing the group creation until
 valid inputs are provided. \\
 Conversely, the "Available Groups" section dynamically populates a list of
 nearby groups that the user can join, identified by the group names defined by
 their respective founders and followed by a "Join" button. Once the user taps on
-this button, the application initiates the joining process, which requires to
-provide a valid username that will be associated with each message sent in the
-group by the user. Again, this attribute must be not empty, otherwise an allert
-with an appropriate error message will prevent the user from joining the group
+this button, the application initiates the joining process, which requires the
+user to provide a valid username that will be associated with each message sent
+in the group by the user. Again, this attribute must be not empty, otherwise an
+alert with an appropriate error message will prevent the user from joining the group
 until a valid username is provided. \\ 
 
-Once a group is created on joined successfully, the user will be
+Once a group is created or joined successfully, the user will be
 redirected to the group chat interface, as shown in Figure \ref{fig:chat_screen}.
 
 \begin{figure}[H]
 \centerline{\includegraphics[width=0.3\textwidth]{assets/chat.png}}
-\caption{Group conversation interface in \textit{PlaneChat}.}
+\caption{Group Conversation Interface in \textit{PlaneChat}.}
 \label{fig:chat_screen}
 \end{figure}
 
 The application provides a streamlined chat layout, with the group name
 displayed at the top of the screen. The main interface hosts the conversation
 history, where each message is rendered as a bubble containing the sender's
-username and the text content. Users can type a messages via the input field at
+username and the text content. Users can type a message via the input field at
 the bottom of the screen. Upon tapping the "Send" button, the message is
 broadcasted to all other users that are currently part of the same group. \\
 
@@ -150,7 +168,7 @@ signal range, the previously exited group continues to be displayed in the
 \section{System Design and Implementation}
 \label{sec:DesignAndImplementation}
 \textit{Plane Chat} is designed to enable users to create groups and chat under
-the constraints of an environemnt where devices can not rely on pre-existing
+the constraints of an environment where devices cannot rely on pre-existing
 infrastructure. To enable communication between devices, the application relies
 on peer-to-peer connections, which are established by leveraging the
 \textit{Multipeer Connectivity} framework provided by \textit{Apple}.\\
@@ -249,7 +267,7 @@ in the application. Consequently, every peer-to-peer link established by the
 framework serves as a transport medium for that specific group's traffic,
 ensuring that membership identity is maintained consistently across the
 multi-hop network. \\
-To exploit the capabilities of the framework, browsering operations are
+To exploit the capabilities of the framework, browsing operations are
 performed not only when a session is available: if a peer is not currently part
 of any session and found a nearby peer that is advertising itself, it will store 
 the peer's information in order to be able to invite it later when a session is
@@ -301,7 +319,7 @@ destination. \\
 
 In our implementation, we chose to adopt the DSDV (Destination-Sequenced
 Distance-Vector) protocol, a proactive routing protocol, meaning that
-each node mantains information about routes to all other nodes in the network,
+each node maintains information about routes to all other nodes in the network,
 independently of the route usage. This approach allows to minimize the latency
 of message delivery, as routes can be immediately used when a message needs to
 be sent, without the need to wait for a route discovery process to complete. \\
@@ -322,7 +340,7 @@ new ones. \\
 
 The DSDV protocol requires each node to advertise, to each of its current
 neighbors, its own routing table periodically or incrementally as soon as a
-significant topological changes are detected: those data broadcasted will contain
+significant topological changes are detected: the data broadcasted will contain
 table entries (where each entry is identified by a destination's address, the
 number of hops required to reach the destination, the sequence number of the
 information received regarding that destination, as originally stamped by the
@@ -334,11 +352,11 @@ are compared based on their hop counts, with the smallest one being preferred.
 \\
 
 Sequence numbers are usually generated by the destination node itself, which
-increments its value upon detecting a signficant change in its local topology,
+increments its value upon detecting a significant change in its local topology,
 such as a new neighbor. In our implementation, such an event is triggered by the
 \texttt{session(\_:peer:didChange:)} method of the \texttt{MCSessionDelegate}
 protocol whenever a peer's state transitions to \texttt{connected}. \\
-Not all the sequence numbers are generateed by the destination node: indeed,
+Not all the sequence numbers are generated by the destination node: indeed,
 when a node observes a broken link to a destination, it will generate a new
 sequence number for that destination and then advertise it 
 to its neighbors: this broken link is identified by infinite distance to the
@@ -368,7 +386,7 @@ carried in each packet. While full dumps typically require multiple NPDUs
 (\textit{Network Protocol Data Unit}), using \textit{Multipeer Connectivity}
 messages as the transport for DSDV control messages -which does not have a fixed
 maximum payload size- allows for both full dumps and incremental updates to be
-sent in a single message. Nonetheless, incremental updates remains preferred, as
+sent in a single message. Nonetheless, incremental updates remain preferred, as
 they reduce the computational overhead of creating and processing full dumps
 while minimizing bandwidth consumption. \\
 
@@ -376,7 +394,7 @@ The DSDV protocol is implemented in the \texttt{DSDVManager} class, which is
 responsible for maintaining the routing table upon receiving updates from the
 \textit{Multipeer Connectivity} framework and for making routing decisions when
 the application layer needs to send an application message to a destination. \\
-As mentioned above, the \texttt{DSDVManager} handle the messages received from
+As mentioned above, the \texttt{DSDVManager} handles the messages received from
 the link layer, distinguishing between: \\
 \begin{itemize}
     \item \textit{Network Control Messages}: these messages are used by the DSDV
@@ -387,11 +405,11 @@ the link layer, distinguishing between: \\
     neighbors to propagate the update across the network;
     \item \textit{Application Data Messages}: these messages are used by the
     application layer to exchange chat messages between users. When the
-    \texttt{DSDVManager} receives an application data message, it inspect the
+    \texttt{DSDVManager} receives an application data message, it inspects the
     destination: if the destination is the local node, the message is 
     forwarded up to the application layer; otherwise it is forwarded to the
     next-hop node accordingly to the routing table. This mechanism allows
-    messages to reach ther final destination through multiple hops, once again
+    messages to reach their final destination through multiple hops, once again
     relying on the \textit{Multipeer Connectivity} framework as the underlying
     transport for packet forwarding. 
 \end{itemize} 
@@ -404,7 +422,7 @@ hiding their complexity from the application layer. \\
 
 \subsection{Application Layer}
 The application layer, in our protocol stack, provides the protocol that is
-responsible for managing the transmission of application data and handlign other
+responsible for managing the transmission of application data and handling other
 operations toward under protocol layers. \\ 
 Our application layer is implemented in the \texttt{ChatManager} class, which is
 also responsible for the management of the business logic of the application.\\
@@ -450,7 +468,7 @@ preventing direct links between the outer nodes.
 Specifically, the first device (iPhone 13) and the third device (iPhone 15) were
 placed 15 meters apart, exceeding the typical 10 meters maximum range of Bluetooth
 connections in open space. 
-To guarantees that the two outer devices were out of each other's communication
+To guarantee that the two outer devices were out of each other's communication
 range, the first device (iPhone 13) is the one responsible for the group
 creation: with this setup, if the third device (iPhone 15) had been able to
 detect the group in the "Available Groups" section, it would have meant that a
@@ -511,7 +529,7 @@ operation of the DSDV protocol within PlaneChat. By leveraging \textit{Multipeer
 Connectivity} as a transport layer, the system successfully maintained
 end-to-end communication across multiple hops inside a MANET. This confirms the
 ability of the application to overcome the physical range limits of Bluetooth,
-proving its viability for successfull message exchanges in constrained in-flight
+proving its viability for successful message exchanges in constrained in-flight
 environments.  
 
 \section{Conclusions}
@@ -552,13 +570,19 @@ ad-hoc group communication in constrained environments among mobile devices,
 allowing us to explore the design and implementation challenges of MANETs in a
 real-scenario application. \\
 Ultimately, the source code of the application is publicly available at
-\url{https://github.com/GianlucaBresolin/PlaneChat}. \\  
+\url{https://github.com/GianlucaBresolin/PlaneChat} \cite{b3}. \\
 
 
 \begin{thebibliography}{00}
-\bibitem{b1} C. E. Perkins and P. Bhagwat, ``Highly dynamic Destination-Sequenced Distance-Vector routing (DSDV) for mobile computers,'' in \textit{Proceedings of the conference on Communications architectures, protocols and applications (SIGCOMM '94)}, 1994, pp. 234--244.
-\bibitem{b2} Apple Inc., ``MultipeerConnectivity,'' Apple Developer Documentation. [Online]. Available: \url{https://developer.apple.com/documentation/multipeerconnectivity}
-\bibitem{b3} G. Bresolin, ``PlaneChat,'' GitHub repository. [Online]. Available: \url{https://github.com/GianlucaBresolin/PlaneChat}
+\bibitem{b1} C. E. Perkins and P. Bhagwat, ``Highly dynamic
+Destination-Sequenced Distance-Vector routing (DSDV) for mobile computers,'' in
+\textit{Proceedings of the conference on Communications architectures, protocols
+and applications (SIGCOMM '94)}, 1994, pp. 234--244. 
+\bibitem{b2} Apple Inc., ``MultipeerConnectivity,'' Apple Developer
+Documentation. [Online]. Available:
+\url{https://developer.apple.com/documentation/multipeerconnectivity} 
+\bibitem{b3} G. Bresolin, ``PlaneChat,'' GitHub repository. [Online]. Available:
+\url{https://github.com/GianlucaBresolin/PlaneChat} 
 \end{thebibliography}
 
 \end{document}
