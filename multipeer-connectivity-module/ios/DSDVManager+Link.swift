@@ -45,7 +45,7 @@ extension DSDVManager: MultipeerManagerNetworkDelegate {
         switch Int(components[0]) {
         case 0:
             // network packet:
-            guard components.count == 4 else {
+            guard components.count == 5 else {
                 print("Network Error: unknown network packet format.")
                 return
             }
@@ -70,13 +70,13 @@ extension DSDVManager: MultipeerManagerNetworkDelegate {
         case 1:
             // application packet
             let destination = String(components[1])
+            let applicationMessage = "\(components[2])|\(components[3])"
+            guard let applicationData = applicationMessage.data(using: .utf8) else {
+                print("Network Error: impossible to forward message, an error occur during application data encoding.")
+                return
+            }
             guard destination == getMyNodeID() else {
                 // we are not the destination: forward packet
-                let applicationMessage = "\(components[2])|\(components[3])"
-                guard let applicationData = applicationMessage.data(using: .utf8) else {
-                    print("Network Error: impossible to forward message, an error occur during application data encoding.")
-                    return
-                }
                 forwardMessage(
                     to: destination,
                     applicationData: applicationData
@@ -88,7 +88,7 @@ extension DSDVManager: MultipeerManagerNetworkDelegate {
                 print("Network Error: impossible to handle message, no application delegate available.")
                 return
             }
-            applicationDelegate.handleMessage(data: data)
+            applicationDelegate.handleMessage(data: applicationData)
         default:
             print("Network Error: unkown packet type.")
             return

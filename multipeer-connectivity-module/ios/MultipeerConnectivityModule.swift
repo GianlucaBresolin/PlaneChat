@@ -9,7 +9,7 @@ public class MultipeerConnectivityModule: Module {
     public func definition() -> ModuleDefinition {
         Name("MultipeerConnectivityModule")
 
-        Events("foundSession", "receivedMessage")
+        Events("foundGroup", "receivedMessage")
 
         OnCreate {
             // retrieve device ID

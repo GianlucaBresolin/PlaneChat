@@ -67,5 +67,13 @@ class ChatManager {
             return
         }
         networkDelegate.broadcastMessage(data: applicationPacketPayload)
+        guard let presentationDelegate = self.PresentationDelegate else {
+            print("Application Error: impossible to send a message. No presentation delegate avaialable.")
+            return
+        }
+        presentationDelegate.notifyMessage(
+            sender: sender,
+            message: message
+        )
     }
 }

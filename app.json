@@ -9,6 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.gianluca.planechat",
+      "buildNumber": "1",
+      "developmentClient": false
+    },
+    "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gianluca.planechat",
       "infoPlist": {
