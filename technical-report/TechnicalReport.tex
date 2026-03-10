@@ -8,6 +8,7 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{float}
+\usepackage{booktabs}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -76,12 +77,9 @@ each other, the application leverages the framework as a link-layer substrate.
 Consequently, we implement the \textit{Destination-Sequenced Distance-Vector}
 (DSDV) routing protocol at the network layer to facilitate multi-hop
 communication between devices. Finally, the application layer provides the
-application logic following a "best-effort" delivery model. To maintain low
-overhead and simplicity, the protocol does not implement any acknowledgement
-(ACK) mechanism or retransmission logic. Consequently, the application operates
-under an unreliable communication paradigm, where the delivery of packets to all
-nodes is not stricly guaranteed. \\
-% sposto details in application layer section
+application logic following a "best-effort" delivery model. \\
+Regarding the UI layer, the application features a simple and intuitive
+interface, implemented using \textit{React Native}. \\
 
 The remainder of this report is organized as follows: Section
 \ref{sec:PlaneChat} provides an overview of the \textit{Plane Chat} application,
@@ -98,15 +96,16 @@ and improvements for the \textit{Plane Chat} application.
 ad-hoc group communication during flights, without relying on pre-existing
 infrastructure. The application is specifically engineered to operate in
 "Ariplane Mode", where cellular and Wi-Fi services are restricted, leveraging
-Bluetooth connections as transport for data exchange between devices. \\
+Bluetooth and peer-to-peer Wi-Fi connections as transport for data exchange
+between devices. \\ 
 
 Upon launch, the application a graphical interface that enables users to either
 create a group or discover and join an existing one in close proximity, as
 illustrated in Figure \ref{fig:initial_screen}. \\ 
 
 \begin{figure}[H]
-\centerline{\includegraphics[width=0.3\textwidth]{assets/initial_screen.png}}
-\caption{Initial user interface of PlaneChat.}
+\centerline{\includegraphics[width=0.3\textwidth]{assets/landing-page.png}}
+\caption{Initial user interface of \textit{PlaneChat}.}
 \label{fig:initial_screen}
 \end{figure}
 
@@ -129,8 +128,8 @@ Once a group is created on joined successfully, the user will be
 redirected to the group chat interface, as shown in Figure \ref{fig:chat_screen}.
 
 \begin{figure}[H]
-\centerline{\includegraphics[width=0.3\textwidth]{assets/initial_screen.png}}
-\caption{Group conversation interface in PlaneChat.}
+\centerline{\includegraphics[width=0.3\textwidth]{assets/chat.png}}
+\caption{Group conversation interface in \textit{PlaneChat}.}
 \label{fig:chat_screen}
 \end{figure}
 
@@ -159,10 +158,16 @@ application uses the \textit{Multipeer Connectivity} framework as a link-layer
 substrate, implementing the \textit{Destination-Sequenced Distance-Vector}
 (DSDV) routing protocol at the network layer to facilitate multi-hop
 communication between devices.\\ 
-At the top of the protocol stack, a custom application layer protocol defines
+Sitting above the network layer, a custom application layer protocol defines
 the application data exchange regarding group and message management. These
 network operations are triggered by the business logic of the application,
 following a "best-effort" delivery model. \\
+Finally, the presentation layer of the application, implemented using \textit{React
+Native}, manages the events triggered by the underlying application layer to
+update the user interface accordingly. Since the focus of this project remains
+on the design and implementation of the wireless network, the details of the
+presentation layer will not be discussed, as they fall outside the primary scope
+of this report. \\ 
 
 \subsection{Link Layer: Multipeer Connectivity Framework}
 The \textit{Multipeer Connectivity} framework is the official solution provided
@@ -173,7 +178,7 @@ data, and resources (such as files). \\
 In \textit{iOS}, the framework uses infrastructure Wi-Fi networks, peer-to-peer
 Wi-Fi, and Bluetooth personal area networks for the underlying transport. \\ 
 For the scope of this project, communications are handled via message-based data
-exchanged over Bluetooth connections and Wi-Fi peer-to-peer connections. \\
+exchanged over Bluetooth connections and peer-to-peer Wi-Fi connections. \\
 This approach represents the highest degree of control accessible to developers,
 as \textit{Apple} restricts direct access to hardware network interfaces,
 thereby preventing the implementation of custom link-layer protocols.
@@ -429,6 +434,84 @@ the delivery of packets to all nodes in the group is not strictly guaranteed.
 
 \section{Experimental Setup and Results}
 \label{sec:ExperimentalSetupAndResults}
+To ensure the correct operation of the \textit{PlaneChat} application, we
+conducted an experimental evaluation to test the functionality of the
+implemented system in a real-world scenario. \\
+
+The experimental setup consisted of three \textit{iOS} devices running the
+\textit{PlaneChat} application under plane mode: an \textit{iPhone 13},
+\textit{iPhone 15}, and a \textit{iPad Air (4th generation)}, all updated to
+\textit{iOS 26.2}. \\ 
+
+To evaluate the network's multi-hop capabilities, the devices were arranged 
+in a linear topology that aimed to challenge the communication limits by
+preventing direct links between the outer nodes. 
+Specifically, the first device (iPhone 13) and the third device (iPhone 15) were
+placed 15 meters apart, exceeding the typical 10 meters maximum range of Bluetooth
+connections in open space. 
+To guarantees that the two outer devices were out of each other's communication
+range, the first device (iPhone 13) is the one responsible for the group
+creation: with this setup, if the third device (iPhone 15) had been able to
+detect the group in the "Available Groups" section, it would have meant that a
+direct connection between the two devices was possible, thereby invalidating the
+test scenario. \\ 
+Conversely, the second device (iPad Air, 4th generation) was approximately
+placed in the middle of the two, at 7.5 meters from other devices. This
+positioning allows the second device to establish a direct connection with both
+the outer devices, enabling to act as an intermediate node for multi-hop
+communication inside the MANET. Again, to ensure the second device (iPad
+Air) could bridge the network, we verified its ability to detect the group
+created by the first device (iPhone 13): this evidence confirmed that the middle
+node was positioned within the communication range of both the outer devices,
+enabling it to establish the direct connections required for the multi-hop
+communication test. \\
+
+Once the devices were properly arranged and all were running the
+\textit{PlaneChat} application under plane mode (with Bluetooth and Wi-Fi
+enabled), the test began with the first device (iPhone 13) creating a group.
+Upon successful creation, the second device (iPad Air) detected and joined the
+group, establishing a direct connection with the first. Once a device joins a
+group, it propagates the group availability to its own neighbors. Consequently,
+after the second device (iPad Air) joined the group, the third device (iPhone
+15) became able to detect the group in the "Available Groups" section, which had
+remained empty until that moment. 
+Finally, the third device (iPhone 15) joined the group, establishing a direct
+connection with the second device (iPad Air), completing the test scenario
+topology. \\
+
+Once all devices joined the group, we tested the multi-hop communication by
+sending a message from one of the outer nodes (the third device, iPhone 15). The
+message was successfully received by both other devices, including the first
+device (iPhone 13), despite it being out of the sender's direct communication
+range. \\
+
+As a result of the test, Table \ref{tab:dsdv_table} reports the
+DSDV routing table of the first device (iPhone 13), logged upon completion of
+the test after the third device (iPhone 15) has joined the group. \\
+
+\begin{table}[htbp]
+    \centering
+    \caption{DSDV table of the first device (iPhone 13)}
+    \label{tab:dsdv_table}
+    \begin{tabular}{cccc}
+        \toprule
+        \textbf{Destination} & \textbf{Next Hop} & \textbf{Hops} & \textbf{Sequence
+        Number} \\
+        \midrule
+        iPhone 13 & iPhone 13 & 0 & 8 \\
+        iPad Air  & iPad Air  & 1 & 8 \\
+        iPhone 15 & iPad Air  & 2 & 4 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The observed behavior and the resulting routing table demonstrate the correct
+operation of the DSDV protocol within PlaneChat. By leveraging \textit{Multipeer
+Connectivity} as a transport layer, the system successfully maintained
+end-to-end communication across multiple hops inside a MANET. This confirms the
+ability of the application to overcome the physical range limits of Bluetooth,
+proving its viability for successfull message exchanges in constrained in-flight
+environments.  
 
 \section{Conclusions}
 \label{sec:Conclusions}
