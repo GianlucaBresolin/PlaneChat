@@ -7,6 +7,10 @@ extension DSDVManager: ChatManagerNetworkDelegate {
             return
         }
         for member in getMembers() {
+            guard let member != MyNodeID else {
+                // skip broadcasting to self
+                continue
+            }
             forwardMessage(
                 to: member,
                 applicationData: data

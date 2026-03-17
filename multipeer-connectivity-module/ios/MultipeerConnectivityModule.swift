@@ -45,7 +45,6 @@ public class MultipeerConnectivityModule: Module {
             self.NetworkManager?.ApplicationDelegate = self.ApplicationManager
             self.NetworkManager?.LinkDelegate = self.LinkManager
             self.LinkManager?.NetworkDelegate = self.NetworkManager
-            
         }
 
         Function("createGroup") { (groupName: String) -> Void in
