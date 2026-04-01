@@ -94,6 +94,7 @@ class DSDVManager {
             // no significant update
             return
         }
+        MySequenceNumber.increment()
         // broadcast update
         var updatedHops = hops
         if updatedHops != -1 {
